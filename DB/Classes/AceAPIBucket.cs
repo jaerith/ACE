@@ -10,7 +10,7 @@ namespace ACE.DB.Classes
 {
     /// <summary>
     /// 
-    /// This class serves as the representation of a record within the 
+    /// This class serves as the representation of a record set within the 
     /// ACE_CFG_BUCKET table.  It will serve to map the tags of a logical
     /// bucket (i.e., the entire set or a subset of a XML composite) within
     /// the pulled Xml to the columns within a target table.
