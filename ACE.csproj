@@ -44,6 +44,7 @@
     <Compile Include="DB\Classes\AceAPIBucket.cs" />
     <Compile Include="DB\Classes\AceAPIConfiguration.cs" />
     <Compile Include="DB\Classes\AceConnectionMetadata.cs" />
+    <Compile Include="DB\Classes\AceProcess.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
