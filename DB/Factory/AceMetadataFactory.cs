@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using ACE.DB.Classes;
 
 namespace ACE.DB.Factory
 {
@@ -12,7 +16,7 @@ namespace ACE.DB.Factory
     /// and assemble it within the cache.
     ///     
     /// </summary>
-    public class AceMetadataFactory
+    public class AceMetadataFactory : IDisposable
     {
         #region Constants
 
@@ -106,8 +110,48 @@ ORDER BY
 
         #endregion
 
-        public AceMetadataFactory()
+        #region Private Members
+        private SqlConnection DbConnection;
+        private SqlCommand    GetActiveProcessesCmd;
+        private SqlCommand    GetProcessDetailsCmd;
+        private SqlCommand    GetAPIDetailsCmd;
+
+        private AceConnectionMetadata ConnectionMetadata;
+
+        #endregion 
+
+        public AceMetadataFactory(AceConnectionMetadata ConnMetadata)
         {
+            this.ConnectionMetadata = ConnMetadata;
+            
+            InitDbMembers();
         }
+
+        public void Dispose()
+        {
+            if (DbConnection != null)
+            {
+                DbConnection.Close();
+                DbConnection = null;
+            }
+        }
+
+        public void InitDbMembers()
+        {
+            DbConnection = new SqlConnection(ConnectionMetadata.DBConnectionString);
+            DbConnection.Open();
+
+            GetActiveProcessesCmd = new SqlCommand(CONST_RETRIEVE_ACTIVE_PROCESSES_SQL, DbConnection);
+
+            GetProcessDetailsCmd = new SqlCommand(CONST_RETRIEVE_PROCESS_DETAILS_SQL, DbConnection);
+            GetProcessDetailsCmd.CommandTimeout = 60;
+            GetProcessDetailsCmd.Parameters.Add(new SqlParameter(":pid", SqlDbType.Int));
+
+            GetAPIDetailsCmd = new SqlCommand(CONST_RETRIEVE_API_DETAILS_SQL, DbConnection);
+            GetAPIDetailsCmd.CommandTimeout = 60;
+            GetAPIDetailsCmd.Parameters.Add(new SqlParameter(":pid", SqlDbType.Int));
+            GetAPIDetailsCmd.Parameters.Add(new SqlParameter(":at",  SqlDbType.Char, 1));
+        }
+
     }
 }
