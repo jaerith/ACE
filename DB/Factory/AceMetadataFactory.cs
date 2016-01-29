@@ -157,6 +157,82 @@ ORDER BY
             return ActiveProcessIds;
         }
 
+        public List<AceProcess> GetActiveJobs()
+        {
+            List<long>           oJobIds = new List<long>();
+            List<AceProcess> oActiveJobs = new List<AceProcess>();
+
+            Dictionary<int, AceProcess> oActiveJobMap = new Dictionary<int, AceProcess>();
+
+            if (!ValidateDbConnection())
+                InitDbMembers();
+
+            oJobIds = GetActiveJobIds();
+
+            foreach (int nTmpJobId in oJobIds)
+            {
+                string sJobName    = "";
+                string sAPIType    = "";
+                string sChangeURL  = "";
+                string sDataURL    = "";
+
+                AceProcess          oTmpJob = null;
+                AceAPIConfiguration oTmpConfig = null;
+
+                GetProcessDetailsCmd.Parameters[@"pid"].Value = nTmpJobId;
+                using (SqlDataReader oProcessDetailsReader = GetProcessDetailsCmd.ExecuteReader())
+                {
+                    oTmpConfig = null;
+
+                    while (oProcessDetailsReader.Read())
+                    {
+                        if (!oActiveJobMap.Keys.Contains(nTmpJobId))
+                        {
+                            oTmpJob = new AceProcess(nTmpJobId);
+
+                            oActiveJobMap[nTmpJobId] = oTmpJob;
+                        }
+
+                        oTmpJob  = oActiveJobMap[nTmpJobId];
+                        sAPIType = oProcessDetailsReader[0].ToString();
+
+                        if (sAPIType == CONST_API_TYPE_CHANGE)
+                            oTmpConfig = oTmpJob.ChangeAPIConfiguration = new AceAPIConfiguration();
+                        else if (sAPIType == CONST_API_TYPE_DATA)
+                            oTmpConfig = oTmpJob.DataAPIConfiguration = new AceAPIConfiguration();
+
+                        if (oTmpConfig != null)
+                            SetAPIBasicConfiguration(oProcessDetailsReader, oTmpConfig);
+                    }
+                }
+
+                if (oTmpJob.ChangeAPIConfiguration != null)
+                {
+                    GetAPIDetailsCmd.Parameters[@"pid"].Value = nTmpJobId;
+                    GetAPIDetailsCmd.Parameters[@"at"].Value  = CONST_API_TYPE_CHANGE;
+                    using (SqlDataReader oAPIDetailsReader = GetAPIDetailsCmd.ExecuteReader())
+                    {
+                        SetAPIDetails(oAPIDetailsReader, oTmpJob.ChangeAPIConfiguration);
+                    }
+                }
+
+                if (oTmpJob.DataAPIConfiguration != null)
+                {
+                    GetAPIDetailsCmd.Parameters[@"pid"].Value = nTmpJobId;
+                    GetAPIDetailsCmd.Parameters[@"at"].Value  = CONST_API_TYPE_DATA;
+                    using (SqlDataReader oAPIDetailsReader = GetAPIDetailsCmd.ExecuteReader())
+                    {
+                        SetAPIDetails(oAPIDetailsReader, oTmpJob.DataAPIConfiguration);
+                    }
+                }
+            }
+
+            foreach (int nJobId in oActiveJobMap.Keys)
+                oActiveJobs.Add(oActiveJobMap[nJobId]);
+
+            return oActiveJobs;
+        }
+
         public void InitDbMembers()
         {
             DbConnection = new SqlConnection(ConnectionMetadata.DBConnectionString);
@@ -210,6 +286,64 @@ ORDER BY
                 return SqlDbType.Decimal;
             else
                 return SqlDbType.VarChar;
+        }
+
+        private void SetAPIBasicConfiguration(SqlDataReader poProcessDetailsReader, AceAPIConfiguration poTmpConfig)
+        {
+            poTmpConfig.BaseURL      = poProcessDetailsReader["aca_base_url"].ToString();
+            poTmpConfig.ApplyBuckets = new Dictionary<string, AceAPIBucket>();
+
+            string   sBucketList = poProcessDetailsReader["aca_bucket_list"].ToString();
+            string[] oBucketList = sBucketList.Split(CONST_BUCKET_LIST_DELIM);
+            foreach (string sBucketName in oBucketList)
+                poTmpConfig.ApplyBuckets[sBucketName] = new AceAPIBucket();
+
+            poTmpConfig.SinceURLArg      = poProcessDetailsReader["aca_since_url_arg_nm"].ToString();
+            poTmpConfig.AnchorIndicator  = poProcessDetailsReader["aca_anchor_ind_tag_nm"].ToString();
+            poTmpConfig.AnchorElement    = poProcessDetailsReader["aca_anchor_val_tag_nm"].ToString();
+
+            string   sAnchorFilterArgs  = poProcessDetailsReader["aca_anchor_filter_args"].ToString();
+            string[] oAnchorFilterList  = sAnchorFilterArgs.Split(CONST_BUCKET_LIST_DELIM);
+            foreach (string sTmpAnchorFilter in oAnchorFilterList)
+            {
+                if (sTmpAnchorFilter.Contains("="))
+                {
+                    string[] oAnchorFilterPair = sTmpAnchorFilter.Split(CONST_PARAM_VAL_DELIM);
+                    if (oAnchorFilterPair.Length == 2)
+                        poTmpConfig.AnchorFilterArgs[oAnchorFilterPair[0]] = oAnchorFilterPair[1];
+                }
+            }
+
+            string   sRequestFilterArgs = poProcessDetailsReader["aca_request_filter_args"].ToString();
+            string[] oRequestFilterList = sRequestFilterArgs.Split(CONST_BUCKET_LIST_DELIM);
+            foreach (string sTmpRequestFilter in oRequestFilterList)
+            {
+                if (sTmpRequestFilter.Contains("="))
+                {
+                    string[] oRequestFilterPair = sTmpRequestFilter.Split(CONST_PARAM_VAL_DELIM);
+                    if (oRequestFilterPair.Length == 2)
+                        poTmpConfig.RequestFilterArgs[oRequestFilterPair[0]] = oRequestFilterPair[1];
+                }
+            }
+
+            poTmpConfig.ResponseFilterPath = poProcessDetailsReader["aca_xpath_resp_filter"].ToString();
+            poTmpConfig.TargetTag          = poProcessDetailsReader["aca_target_chld_tag"].ToString();
+            poTmpConfig.TargetKeyTag       = poProcessDetailsReader["aca_target_chld_key_tag"].ToString();
+
+            if (!poProcessDetailsReader.IsDBNull(11))
+            {
+                string sKeyList = poProcessDetailsReader["aca_target_key_list"].ToString();
+
+                if (sKeyList.Contains("_"))
+                    poTmpConfig.KeyList = GetAllKeysFromTable(sKeyList, poTmpConfig.TargetKeyTag);
+                else
+                {
+                    string[] oKeyList = poProcessDetailsReader["aca_target_key_list"].ToString().Split(CONST_BUCKET_LIST_DELIM);
+
+                    poTmpConfig.KeyList.UnionWith(oKeyList);
+                    // poTmpConfig.KeyList.InsertRange(0, oKeyList);
+                }
+            }
         }
 
         private void SetAPIDetails(SqlDataReader poAPIDetailsReader, AceAPIConfiguration poTmpConfig)
