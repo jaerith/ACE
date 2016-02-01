@@ -233,23 +233,6 @@ ORDER BY
             return oActiveJobs;
         }
 
-        public void InitDbMembers()
-        {
-            DbConnection = new SqlConnection(ConnectionMetadata.DBConnectionString);
-            DbConnection.Open();
-
-            GetActiveProcessesCmd = new SqlCommand(CONST_RETRIEVE_ACTIVE_PROCESSES_SQL, DbConnection);
-
-            GetProcessDetailsCmd = new SqlCommand(CONST_RETRIEVE_PROCESS_DETAILS_SQL, DbConnection);
-            GetProcessDetailsCmd.CommandTimeout = 60;
-            GetProcessDetailsCmd.Parameters.Add(new SqlParameter(@"pid", SqlDbType.Int));
-
-            GetAPIDetailsCmd = new SqlCommand(CONST_RETRIEVE_API_DETAILS_SQL, DbConnection);
-            GetAPIDetailsCmd.CommandTimeout = 60;
-            GetAPIDetailsCmd.Parameters.Add(new SqlParameter(@"pid", SqlDbType.Int));
-            GetAPIDetailsCmd.Parameters.Add(new SqlParameter(@"at",  SqlDbType.Char, 1));
-        }
-
         private HashSet<string> GetAllKeysFromTable(string psKeyListTable, string psKeyColumn)
         {
             string          sTmpKey       = null;
@@ -286,6 +269,23 @@ ORDER BY
                 return SqlDbType.Decimal;
             else
                 return SqlDbType.VarChar;
+        }
+
+        public void InitDbMembers()
+        {
+            DbConnection = new SqlConnection(ConnectionMetadata.DBConnectionString);
+            DbConnection.Open();
+
+            GetActiveProcessesCmd = new SqlCommand(CONST_RETRIEVE_ACTIVE_PROCESSES_SQL, DbConnection);
+
+            GetProcessDetailsCmd = new SqlCommand(CONST_RETRIEVE_PROCESS_DETAILS_SQL, DbConnection);
+            GetProcessDetailsCmd.CommandTimeout = 60;
+            GetProcessDetailsCmd.Parameters.Add(new SqlParameter(@"pid", SqlDbType.Int));
+
+            GetAPIDetailsCmd = new SqlCommand(CONST_RETRIEVE_API_DETAILS_SQL, DbConnection);
+            GetAPIDetailsCmd.CommandTimeout = 60;
+            GetAPIDetailsCmd.Parameters.Add(new SqlParameter(@"pid", SqlDbType.Int));
+            GetAPIDetailsCmd.Parameters.Add(new SqlParameter(@"at",  SqlDbType.Char, 1));
         }
 
         private void SetAPIBasicConfiguration(SqlDataReader poProcessDetailsReader, AceAPIConfiguration poTmpConfig)
