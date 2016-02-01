@@ -136,6 +136,13 @@ ORDER BY
             }
         }
 
+        /// <summary>
+        /// 
+        /// This method will run a query on the ACE_CFG_PROCESS table and retrieve a list 
+        /// of all the IDs for API retrieval jobs that are currently active.
+        /// 
+        /// <returns>The IDs of the API retrieval jobs that are currently active</returns>
+        /// </summary>
         public List<long> GetActiveJobIds()
         {
             int nProcessId = -1;
@@ -157,6 +164,13 @@ ORDER BY
             return ActiveProcessIds;
         }
 
+        /// <summary>
+        /// 
+        /// This method will run a query on the ACE_CFG_API table and retrieve all 
+        /// the necessary metadata for API retrieval jobs that are currently active.
+        /// 
+        /// <returns>The IDs of the API retrieval jobs that are currently active</returns>
+        /// </summary>
         public List<AceProcess> GetActiveJobs()
         {
             List<long>           oJobIds = new List<long>();
@@ -233,6 +247,19 @@ ORDER BY
             return oActiveJobs;
         }
 
+        /// <summary>
+        /// 
+        /// This method will retrieve a list of keys from a table.  If the key for our target table is simply one column,
+        /// we can target this specific list when we start to pull data through the API described by the metadata.
+        /// 
+        /// NOTE: If there is no key list table mentioned or if the key list table is empty, we will follow the 
+        /// normal convention of the API configuration and pull all the data that fits our criteria of taking 
+        /// the latest updates.
+        /// 
+        /// <param name="psKeyListTable">The table that has the specific keys of interest</param>
+        /// <param name="psKeyColumn">The column that has the specific keys of interest</param>
+        /// <returns>The unique list of keys that we will use to pull specific records through the API</returns>
+        /// </summary>
         private HashSet<string> GetAllKeysFromTable(string psKeyListTable, string psKeyColumn)
         {
             string          sTmpKey       = null;
@@ -255,6 +282,13 @@ ORDER BY
             return oKeyList;
         }
 
+        /// <summary>
+        /// 
+        /// This method will map a type name (mentioned in the metadata) to its respective SqlDbType.
+        /// 
+        /// <param name="psAttrType">The SqlDbType that is mapped to the verbose type name</param>
+        /// <returns>The SqlDbType for the metadata's verbose type name (of a target column)</returns>
+        /// </summary>
         private SqlDbType GetMappedOraDbType(string psAttrType)
         {
             if (psAttrType == CONST_DB_TYPE_VARCHAR)
