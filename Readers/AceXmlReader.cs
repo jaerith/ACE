@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ACE.Readers
 {
-    class AceXmlReader
+    public class AceXmlReader
     {
     }
 }
