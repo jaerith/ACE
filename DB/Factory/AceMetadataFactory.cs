@@ -322,6 +322,15 @@ ORDER BY
             GetAPIDetailsCmd.Parameters.Add(new SqlParameter(@"at",  SqlDbType.Char, 1));
         }
 
+        /// <summary>
+        /// 
+        /// This method will extract the general information (like the URLs and their respective arguments)
+        /// needed in order to drive the retrieval of data through the API.
+        /// 
+        /// <param name="poProcessDetailsReader">The reader that pulls metadata from the configuration tables</param>
+        /// <param name="poTmpConfig">The structure that will hold all of the extract config metadata</param>
+        /// <returns>None.</returns>
+        /// </summary>
         private void SetAPIBasicConfiguration(SqlDataReader poProcessDetailsReader, AceAPIConfiguration poTmpConfig)
         {
             poTmpConfig.BaseURL      = poProcessDetailsReader["aca_base_url"].ToString();
@@ -380,6 +389,15 @@ ORDER BY
             }
         }
 
+        /// <summary>
+        /// 
+        /// This method will extract the detailed information (like the payload's tags mapping to which 
+        /// columns of a staging table) needed in order to drive the retrieval of data through the API.
+        /// 
+        /// <param name="poProcessDetailsReader">The reader that pulls metadata from the configuration tables</param>
+        /// <param name="poTmpConfig">The structure that will hold all of the extract config metadata</param>
+        /// <returns>None.</returns>
+        /// </summary>
         private void SetAPIDetails(SqlDataReader poAPIDetailsReader, AceAPIConfiguration poTmpConfig)
         {
             while (poAPIDetailsReader.Read())
