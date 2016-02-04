@@ -60,6 +60,8 @@ namespace ACE.Readers
         /// 2.) The stored non-literals will be treated as XPath directions, used to draw out additional values
         /// from the provided XML body.  These values will be added to the final list.
         /// 
+        /// The final list will then be used to assemble the query string for our call of the intended REST API.
+        /// 
         /// <param name="psXmlBody">The XML body (likely a manifest payload) that can provide more arguments for the REST API</param>
         /// <param name="poTemplateFilterArgs">The metadata that describes the process for our assembly of API arguments</param>
         /// <returns>The final list of arguments to use when calling the intended REST API</returns>
