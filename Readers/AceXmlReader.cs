@@ -113,16 +113,42 @@ namespace ACE.Readers
             return oFinalFilterArgs;
         }
 
+        /// <summary>
+        /// 
+        /// This method will format a GET request URL for our target REST API.  In this case, the request 
+        /// will make a subsequent (i.e., not initial) call in the enumeration of sought data, and it 
+        /// will use an anchor point (record from a previous call) along with various other arguments.
+        /// 
+        /// <param name="poConfig">The configuration's metadata for the REST API</param>
+        /// <returns>The formatted call to our intended REST API</returns>
+        /// </summary>
         public static string FormatAnchorURL(AceAPIConfiguration poConfig)
         {
             return FormatURL(poConfig.BaseURL, poConfig.AnchorFilterArgs);
         }
 
+        /// <summary>
+        /// 
+        /// This method will format a GET request URL for our target REST API.  In this case, the request 
+        /// will make an initial call in the enumeration of sought data, using the metadata contained
+        /// within our configuration.
+        /// 
+        /// <param name="poConfig">The configuration's metadata for the REST API</param>
+        /// <returns>The formatted call to our intended REST API</returns>
+        /// </summary>
         public static string FormatRequestURL(AceAPIConfiguration poConfig)
         {
             return FormatURL(poConfig.BaseURL, poConfig.RequestFilterArgs);
         }
 
+        /// <summary>
+        /// 
+        /// This method will format a GET request URL for our target REST API.
+        /// 
+        /// <param name="psBaseURL">The base call for the REST API</param>
+        /// <param name="poFilterArgs">The query string's arguments and values for the REST API</param>
+        /// <returns>The formatted call to our intended REST API</returns>
+        /// </summary>
         public static string FormatURL(String psBaseURL, Dictionary<string, string> poFilterArgs)
         {
             string sTempVal = null;
