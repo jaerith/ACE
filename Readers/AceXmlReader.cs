@@ -171,5 +171,63 @@ namespace ACE.Readers
 
             return String.Format(psBaseURL + sbQueryString);
         }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return (IEnumerator) GetEnumerator();
+        }
+
+        public AceXmlRecordEnumerator GetEnumerator()
+        {
+            return new AceXmlRecordEnumerator(this, APIConfiguration);
+        }
     }
+
+    public class AceXmlRecordEnumerator : IEnumerator
+    {
+        private AceXmlReader XmlReader       = null;
+        private XDocument    CurrXmlResponse = null;
+
+        private bool mbFinalSet = false;
+        private int  mnIndex    = -1;
+
+        private List<Hashtable> CurrRecordList = null;
+        private Hashtable       CurrRecord     = null;
+
+        private AceAPIConfiguration EnumAPIConfiguration = null;
+
+        public AceXmlRecordEnumerator(AceXmlReader poXmlReader, AceAPIConfiguration poConfiguration)
+        {
+            XmlReader            = poXmlReader;
+            EnumAPIConfiguration = poConfiguration;
+        }
+
+        public bool MoveNext()
+        {
+            bool bResult = false;
+
+            return bResult;
+        }
+
+        private bool PullNextSet()
+        {
+            bool bMoreData = false;
+
+            return bMoreData;
+        }
+
+        public void Reset()
+        {
+            return;
+        }
+
+        public object Current
+        {
+            get
+            {
+                return CurrRecord;
+            }
+        }
+    }
+
 }
