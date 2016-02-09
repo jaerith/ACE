@@ -16,5 +16,10 @@ namespace ACE.Writers
 {
     public class AceChangeRecordWriter : IDisposable
     {
+        public AceChangeRecordWriter()
+        { }
+
+        public void Dispose()
+        { }
     }
 }
