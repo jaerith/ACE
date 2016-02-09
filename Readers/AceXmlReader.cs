@@ -172,24 +172,42 @@ namespace ACE.Readers
             return String.Format(psBaseURL + sbQueryString);
         }
 
+        /// <summary>
+        /// 
+        /// This method will fulfill the contractual obligation of the IEnumerable interface.
+        /// 
+        /// <returns>The enumerator for our XML reader</returns>
+        /// </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return (IEnumerator) GetEnumerator();
         }
 
+        /// <summary>
+        /// 
+        /// This method will provide the actual enumerator for reading a XML payload.
+        /// 
+        /// <returns>The enumerator for our XML reader</returns>
+        /// </summary>
         public AceXmlRecordEnumerator GetEnumerator()
         {
             return new AceXmlRecordEnumerator(this, APIConfiguration);
         }
     }
 
+    /// <summary>
+    /// 
+    /// This class will serve as the enumerator for a XML payload being read by an instance
+    /// of the AceXmlReader class.
+    ///     
+    /// </summary>
     public class AceXmlRecordEnumerator : IEnumerator
     {
         private AceXmlReader XmlReader       = null;
         private XDocument    CurrXmlResponse = null;
 
-        private bool mbFinalSet = false;
-        private int  mnIndex    = -1;
+        private bool IsFinalSet = false;
+        private int  CurrIndex  = -1;
 
         private List<Hashtable> CurrRecordList = null;
         private Hashtable       CurrRecord     = null;
@@ -202,9 +220,29 @@ namespace ACE.Readers
             EnumAPIConfiguration = poConfiguration;
         }
 
+        /// <summary>
+        /// 
+        /// This method will fulfill the contractual obligation of the IEnumerator interface and 
+        /// will traverse to the next available record.
+        /// 
+        /// <returns>The indicator of whether another record was read from the REST API</returns>
         public bool MoveNext()
         {
             bool bResult = false;
+
+            ++CurrIndex;
+            if ((CurrRecordList != null) && (CurrIndex < CurrRecordList.Count))
+            {
+                bResult    = true;
+                CurrRecord = CurrRecordList[CurrIndex];
+            }
+            else if (!IsFinalSet && PullNextSet())
+            {
+                ++CurrIndex;
+
+                bResult      = true;
+                CurrRecord = CurrRecordList[CurrIndex];
+            }
 
             return bResult;
         }
@@ -216,11 +254,22 @@ namespace ACE.Readers
             return bMoreData;
         }
 
+        /// <summary>
+        /// 
+        /// This method will fulfill the contractual obligation of the IEnumerator interface.
+        /// 
+        /// <returns>None.</returns>
         public void Reset()
         {
             return;
         }
 
+        /// <summary>
+        /// 
+        /// This method will fulfill the contractual obligation of the IEnumerator interface by
+        /// providing the latest record of the enumeration.
+        /// 
+        /// <returns>The latest record read via the enumeration</returns>
         public object Current
         {
             get
