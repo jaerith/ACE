@@ -193,6 +193,146 @@ namespace ACE.Readers
         {
             return new AceXmlRecordEnumerator(this, APIConfiguration);
         }
+
+        /// <summary>
+        /// 
+        /// This method will assemble the next call to the REST API and then retrieve the
+        /// XML payload as a string.
+        /// 
+        /// <param name="psBaseURL">The base call for the REST API</param>
+        /// <param name="poFilterArgs">The query string's arguments and values for the REST API</param>
+        /// <returns>The string representation of the XML payload from the REST API</returns>
+        /// </summary>
+        static public string PullData(string psBaseURL, Dictionary<string, string> poFilterArgs)
+        {
+            string sRequestURL = AceXmlReader.FormatURL(psBaseURL, poFilterArgs);
+
+            return PullData(WebRequest.Create(sRequestURL));
+        }
+
+        /// <summary>
+        /// 
+        /// This method will make the next call to the REST API and then retrieve the
+        /// XML payload as a string.
+        /// 
+        /// <param name="poAPIRequest">The Request object that represents our call to the REST API</param>
+        /// <returns>The string representation of the XML payload from the REST API</returns>
+        /// </summary>
+        static public string PullData(WebRequest poAPIRequest)
+        {
+            string sResponseXml = null;
+
+            poAPIRequest.Timeout = CONST_WEB_REQUEST_TIMEOUT_MS;
+
+            for (int nRetryCount = 0; nRetryCount < 3; ++nRetryCount)
+            {
+                try
+                {
+                    using (WebResponse oWebAPIResponse = poAPIRequest.GetResponse())
+                    {
+                        // Get the stream containing content returned by the server.
+                        Stream oDataStream = oWebAPIResponse.GetResponseStream();
+
+                        // Open the stream using a StreamReader for easy access.
+                        using (StreamReader oWebReader = new StreamReader(oDataStream))
+                        {
+                            sResponseXml = oWebReader.ReadToEnd();
+                        }
+                    }
+
+                    break;
+                }
+                catch (WebException ex)
+                {
+                    if ((nRetryCount + 1) < 3)
+                    {
+                        System.Console.WriteLine("DEBUG: Timeout issue with pulling product data for URL(" + poAPIRequest.RequestUri.ToString() +
+                                                 ")...attempting to pull the data again...");
+                    }
+                    else
+                        throw ex;
+                }
+            }
+
+            return sResponseXml;
+        }
+
+        /// <summary>
+        /// 
+        /// This method will assemble the next call to the REST API and then retrieve the
+        /// XML payload as a XDocument.
+        /// 
+        /// <param name="psBaseURL">The base call for the REST API</param>
+        /// <param name="poFilterArgs">The query string's arguments and values for the REST API</param>
+        /// <returns>The XDocument representation of the XML payload from the REST API</returns>
+        /// </summary>
+        static public XDocument PullXmlDoc(string psBaseURL, Dictionary<string, string> poFilterArgs)
+        {
+            string sRequestURL = AceXmlReader.FormatURL(psBaseURL, poFilterArgs);
+
+            return PullXmlDoc(sRequestURL);
+        }
+
+        /// <summary>
+        /// 
+        /// This method will make the next call to the REST API and then retrieve the
+        /// XML payload as a XDocument.
+        /// 
+        /// <param name="psRequestURL">The Request URL for our call to the REST API</param>
+        /// <returns>The XDocument representation of the XML payload from the REST API</returns>
+        /// </summary>
+        static public XDocument PullXmlDoc(string psRequestURL)
+        {
+            XDocument oXDoc = null;
+            WebRequest oWebAPIRequest = null;
+
+            for (int nRetryCount = 0; nRetryCount < 3; ++nRetryCount)
+            {
+                try
+                {
+                    oWebAPIRequest = WebRequest.Create(psRequestURL);
+
+                    oWebAPIRequest.Timeout = AceXmlReader.CONST_WEB_REQUEST_TIMEOUT_MS;
+
+                    // If required by the server, set the credentials.
+                    oWebAPIRequest.Credentials = CredentialCache.DefaultCredentials;
+
+                    using (WebResponse oWebAPIResponse = oWebAPIRequest.GetResponse())
+                    {
+                        // Get the stream containing content returned by the server.
+                        Stream oDataStream = oWebAPIResponse.GetResponseStream();
+
+                        // Open the stream using a StreamReader for easy access.
+                        using (StreamReader oWebReader = new StreamReader(oDataStream))
+                        {
+                            oXDoc = XDocument.Load(oWebReader, LoadOptions.PreserveWhitespace);
+                        }
+                    }
+
+                    break;
+                }
+                catch (WebException ex)
+                {
+                    if ((nRetryCount + 1) < 3)
+                    {
+                        if (oWebAPIRequest != null)
+                        {
+                            System.Console.WriteLine("DEBUG: Timeout (value=" + oWebAPIRequest.Timeout + ") issue with pulling catalog data for URL(" +
+                                                     oWebAPIRequest.RequestUri.ToString() + ")...attempting to pull the data again..." + DateTime.Now.ToString());
+                        }
+                    }
+                    else
+                        throw ex;
+                }
+            }
+
+            return oXDoc;
+        }
+
+        public void StartEnumerator()
+        {
+            Dispose();
+        }
     }
 
     /// <summary>
@@ -249,7 +389,7 @@ namespace ACE.Readers
 
         private bool PullNextSet()
         {
-            bool bMoreData = false;
+            bool   bMoreData   = false;
 
             return bMoreData;
         }
