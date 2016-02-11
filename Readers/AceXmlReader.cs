@@ -387,9 +387,105 @@ namespace ACE.Readers
             return bResult;
         }
 
+        /// <summary>
+        /// 
+        /// This method will do the heavy work of actually of performing our enumeration through 
+        /// the target REST API.  Since it is possible that we might retrieve only a subset of 
+        /// the sought records for each call, we might need to make repeated calls to the API.  
+        /// If the current batch has not been exhausted, then the MoveNext() method will return the
+        /// next record from that batch.  However, if we're at the start of the enumeration or if 
+        /// the current batch has been exhausted, this method will then make a subsequent call 
+        /// to the API in order to retrieve the next batch.
+        /// 
+        /// <returns>The indicator of whether another batch was pulled through the REST API</returns>
         private bool PullNextSet()
         {
             bool   bMoreData   = false;
+            string sRequestURL = "";
+
+            CurrIndex = -1;
+
+            if (!String.IsNullOrEmpty(EnumAPIConfiguration.CurrentAnchor))
+                sRequestURL = EnumAPIConfiguration.CurrentAnchor;
+            else
+                sRequestURL = AceXmlReader.FormatRequestURL(EnumAPIConfiguration);
+
+            System.Console.WriteLine("DEBUG: The next request via the Change API is URL (" + sRequestURL + ")..." + DateTime.Now.ToString());
+            System.Console.Out.Flush();
+
+            CurrXmlResponse = AceXmlReader.PullXmlDoc(sRequestURL);
+
+            if (!String.IsNullOrEmpty(EnumAPIConfiguration.AnchorIndicator))
+            {
+                string sAnchorIndicator = CurrXmlResponse.Root.Element(EnumAPIConfiguration.AnchorIndicator).Value;
+                if (!String.IsNullOrEmpty(sAnchorIndicator) && sAnchorIndicator.Equals("true", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    if (!String.IsNullOrEmpty(EnumAPIConfiguration.AnchorElement))
+                    {
+                        string sAnchorValue = CurrXmlResponse.Root.Element(EnumAPIConfiguration.AnchorElement).Value;
+
+                        if (!String.IsNullOrEmpty(sAnchorValue))
+                        {
+                            if (sAnchorValue.ToLower().StartsWith("http"))
+                                EnumAPIConfiguration.CurrentAnchor = sAnchorValue;
+                            else
+                                EnumAPIConfiguration.CurrentAnchor = AceXmlReader.FormatAnchorURL(EnumAPIConfiguration) + sAnchorValue;
+
+                            if (XmlReader.FoundNewAnchorCallback != null)
+                                XmlReader.FoundNewAnchorCallback(EnumAPIConfiguration.CurrentAnchor);
+                        }
+                    }
+                }
+                else
+                {
+                    IsFinalSet = true;
+                    EnumAPIConfiguration.CurrentAnchor = "";
+                }
+            }
+            else
+            {
+                IsFinalSet = true;
+                EnumAPIConfiguration.CurrentAnchor = "";
+            }
+
+            if (!String.IsNullOrEmpty(EnumAPIConfiguration.TargetTag) && !String.IsNullOrEmpty(EnumAPIConfiguration.TargetKeyTag))
+            {
+                if (!String.IsNullOrEmpty(EnumAPIConfiguration.ResponseFilterPath))
+                {
+
+                    // NOTE: Currently, the sought parent tag of our enumerated records is "body", 
+                    //       but that can also be configured through metadata
+                    CurrRecordList =
+                        (
+                             from x in CurrXmlResponse.Root.Elements(EnumAPIConfiguration.TargetTag)
+                             where x.XPathSelectElement(EnumAPIConfiguration.ResponseFilterPath) != null
+                               && x.XPathSelectElement(EnumAPIConfiguration.ResponseFilterPath).Value != null
+                            select new Hashtable()
+                            {
+                                { EnumAPIConfiguration.TargetKeyTag, x.Element(EnumAPIConfiguration.TargetKeyTag).Value }, 
+                                { "body",                            x.ToString() }
+                            }
+                        ).ToList();
+                }
+                else
+                {
+                    // NOTE: Currently, the sought parent tag of our enumerated records is "body", 
+                    //       but that can also be configured through metadata
+                    CurrRecordList =
+                        (
+                            from x in CurrXmlResponse.Root.Elements(EnumAPIConfiguration.TargetTag)
+                            // where x.
+                            select new Hashtable()
+                            {
+                                { EnumAPIConfiguration.TargetKeyTag, x.Element(EnumAPIConfiguration.TargetKeyTag).Value }, 
+                                { "body",                            x.ToString() }
+                            }
+                        ).ToList();
+                }
+
+                if (CurrRecordList.Count > 0)
+                    bMoreData = true;
+            }
 
             return bMoreData;
         }
