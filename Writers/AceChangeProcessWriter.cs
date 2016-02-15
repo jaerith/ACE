@@ -20,7 +20,7 @@ namespace ACE.Writers
         private const string CONST_PROCESS_STATUS_COMPLETED = "C";
         private const string CONST_PROCESS_STATUS_FAILED    = "F";
 
-        #region SQL
+        #region SQL Statements
 
         #region Gets Maximum Start Time
 
