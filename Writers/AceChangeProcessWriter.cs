@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -24,7 +25,7 @@ namespace ACE.Writers
 
         #region Gets Maximum Start Time
 
-        private string msGetMaxStartDtimeSql =
+        private const string msGetMaxStartDtimeSql =
 @"
 SELECT
     c.change_id, 
@@ -45,7 +46,7 @@ WHERE
 
         #region Gets Previous Process Instance Failure
 
-        private string msGetPreviousProcessFailureSql =
+        private const string msGetPreviousProcessFailureSql =
 @"
 SELECT
     c.change_id, c.last_anchor
@@ -61,7 +62,7 @@ AND
 
         #region Insert Process Instance
 
-        private string msInsertProcessInstanceSql =
+        private const string msInsertProcessInstanceSql =
 @"
 INSERT INTO
     ace_change(process_id, start_dtime)
@@ -75,7 +76,7 @@ RETURNING
 
         #region Set Change Process Complete
 
-        private string msSetProcessCompleteSql =
+        private const string msSetProcessCompleteSql =
 @"
 UPDATE
     ace_change
@@ -94,7 +95,7 @@ AND
 
         #region Set Change Process Complete
 
-        private string msSetProcessFailureSql =
+        private const string msSetProcessFailureSql =
 @"
 UPDATE
     ace_change
@@ -112,7 +113,7 @@ AND
 
         #region Update Anchor
 
-        private string msUpdateAnchorSql =
+        private const string msUpdateAnchorSql =
 @"
 UPDATE
     ace_change
@@ -129,10 +130,67 @@ AND
 
         #endregion
 
-        public AceChangeProcessWriter()
-        { }
+        #region Private Members
+
+        private object DbLock;
+
+        private SqlConnection DbConnection;
+        private SqlCommand    GetPreviousProcessFailureCmd;
+        private SqlCommand    GetMaxStartDtimeCmd;
+        private SqlCommand    InsertNewProcessInstanceCmd;
+        private SqlCommand    SetProcessCompleteCmd;
+        private SqlCommand    SetProcessFailureCmd;
+        private SqlCommand    UpdateProcessAnchorCmd;
+
+        private AceConnectionMetadata ConnMetadata;
+
+        #endregion
+
+        #region Properties
+
+        public int  CurrentProcessID { get; set; }
+        public long CurrentChangeSeq { get; set; }
+
+        #endregion
+
+        public AceChangeProcessWriter(AceConnectionMetadata poPmdStgConnMetadata)
+        {
+            CurrentProcessID = -1;
+            CurrentChangeSeq = -1;
+
+            DbLock = new object();
+
+            ConnMetadata = poPmdStgConnMetadata;
+
+            InitDbMembers();
+        }
 
         public void Dispose()
-        { }
+        {
+            if (DbConnection != null)
+            {
+                DbConnection.Close();
+                DbConnection = null;
+            }
+        }
+
+        public void InitDbMembers()
+        {
+            lock (DbLock)
+            {
+                // Works Server
+                DbConnection = new SqlConnection(ConnMetadata.DBConnectionString);
+                DbConnection.Open();
+
+                GetMaxStartDtimeCmd = new SqlCommand(msGetMaxStartDtimeSql, DbConnection);
+                GetMaxStartDtimeCmd.Parameters.Add(new SqlParameter(@"pid",    SqlDbType.BigInt));
+                GetMaxStartDtimeCmd.Parameters.Add(new SqlParameter(@"status", SqlDbType.Char, 1));
+
+                GetPreviousProcessFailureCmd = new SqlCommand(msGetPreviousProcessFailureSql, DbConnection);
+                GetPreviousProcessFailureCmd.Parameters.Add(new SqlParameter(@"pid", SqlDbType.BigInt));
+
+                // Initialize the other SQL commands here
+            }
+        }
     }
 }
