@@ -189,7 +189,25 @@ AND
                 GetPreviousProcessFailureCmd = new SqlCommand(msGetPreviousProcessFailureSql, DbConnection);
                 GetPreviousProcessFailureCmd.Parameters.Add(new SqlParameter(@"pid", SqlDbType.BigInt));
 
-                // Initialize the other SQL commands here
+                InsertNewProcessInstanceCmd = new SqlCommand(msInsertProcessInstanceSql, DbConnection);
+                InsertNewProcessInstanceCmd.Parameters.Add(new SqlParameter(@"pid", SqlDbType.BigInt));
+                InsertNewProcessInstanceCmd.Parameters.Add(new SqlParameter(@"cid", SqlDbType.BigInt, 24, ParameterDirection.ReturnValue, true, 0, 0, null, DataRowVersion.Current, null));
+
+                SetProcessCompleteCmd = new SqlCommand(msSetProcessCompleteSql, DbConnection);
+                SetProcessCompleteCmd.Parameters.Add(new SqlParameter(@"total", SqlDbType.Int));
+                SetProcessCompleteCmd.Parameters.Add(new SqlParameter(@"cid",   SqlDbType.BigInt));
+                SetProcessCompleteCmd.Parameters.Add(new SqlParameter(@"pid",   SqlDbType.Int));
+
+                SetProcessFailureCmd = new SqlCommand(msSetProcessFailureSql, DbConnection);
+                SetProcessFailureCmd.Parameters.Add(new SqlParameter(@"anchor", SqlDbType.VarChar, 512));
+                SetProcessFailureCmd.Parameters.Add(new SqlParameter(@"cid",    SqlDbType.BigInt));
+                SetProcessFailureCmd.Parameters.Add(new SqlParameter(@"pid",    SqlDbType.Int));
+
+                UpdateProcessAnchorCmd = new SqlCommand(msUpdateAnchorSql, DbConnection);
+                UpdateProcessAnchorCmd.Parameters.Add(new SqlParameter(@"anchor", SqlDbType.VarChar, 512));
+                UpdateProcessAnchorCmd.Parameters.Add(new SqlParameter(@"cid",    SqlDbType.BigInt));
+                UpdateProcessAnchorCmd.Parameters.Add(new SqlParameter(@"pid",    SqlDbType.Int));
+
             }
         }
     }
