@@ -153,6 +153,8 @@ AND
 
         #endregion
 
+        #region Constructors/Initialization
+
         public AceChangeProcessWriter(AceConnectionMetadata poPmdStgConnMetadata)
         {
             CurrentProcessID = -1;
@@ -173,6 +175,7 @@ AND
                 DbConnection = null;
             }
         }
+
 
         public void InitDbMembers()
         {
@@ -210,5 +213,72 @@ AND
 
             }
         }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// 
+        /// This method will retrieve the last run time for our configured process.  If the last process
+        /// ran successfully, then only the DateTime will be returned.  However, if the last process failed
+        /// during its enumeration of the API (in which it supposedly called the REST API repeatedly to
+        /// obtain batch after batch of records), then the recorded URL that was last attempted will be
+        /// returned via the provided StringBuilder.
+        /// 
+        /// <param name="pnProcessID">The ID of the configured Process in which we are interested</param>
+        /// <param name="poLastAnchor">The container of the last URL attempt in the previously failed run (i.e., enumeration of the REST API)</param>
+        /// <returns>The starting time of the last run for the Process</returns>
+        public DateTime GetMaxStartDtime(int pnProcessID, StringBuilder poLastAnchor)
+        {
+            string   sCompletedChangeId      = "";
+            string   sCompletedLastAnchor    = "";
+            string   sFailureChangeId        = "";
+            string   sFailureLastAnchor      = "";
+            DateTime oCompletedMaxStartDtime = DateTime.Now.Subtract(new TimeSpan(30, 0, 0, 0));
+            DateTime oFailureMaxStartDtime   = DateTime.Now.Subtract(new TimeSpan(30, 0, 0, 0));
+            DateTime oMaxDateStartDtime      = DateTime.Now.Subtract(new TimeSpan(30, 0, 0, 0));
+
+            GetMaxStartDtimeCmd.Parameters[@"pid"].Value    = pnProcessID;
+            GetMaxStartDtimeCmd.Parameters[@"status"].Value = CONST_PROCESS_STATUS_COMPLETED;
+            using (SqlDataReader oMaxStartDtimeReader = GetMaxStartDtimeCmd.ExecuteReader())
+            {
+                if (oMaxStartDtimeReader.Read())
+                {
+                    sCompletedChangeId      = oMaxStartDtimeReader[0].ToString();
+                    sCompletedLastAnchor    = oMaxStartDtimeReader[1].ToString();
+                    oCompletedMaxStartDtime = oMaxStartDtimeReader.GetDateTime(2);
+                }
+            }
+
+            GetMaxStartDtimeCmd.Parameters[@"pid"].Value    = pnProcessID;
+            GetMaxStartDtimeCmd.Parameters[@"status"].Value = CONST_PROCESS_STATUS_FAILED;
+            using (SqlDataReader oMaxStartDtimeReader = GetMaxStartDtimeCmd.ExecuteReader())
+            {
+                if (oMaxStartDtimeReader.Read())
+                {
+                    sFailureChangeId      = oMaxStartDtimeReader[0].ToString();
+                    sFailureLastAnchor    = oMaxStartDtimeReader[1].ToString();
+                    oFailureMaxStartDtime = oMaxStartDtimeReader.GetDateTime(2);
+                }
+            }
+
+            if (oFailureMaxStartDtime > oCompletedMaxStartDtime)
+            {
+                if ((poLastAnchor != null) && !String.IsNullOrEmpty(sFailureLastAnchor))
+                {
+                    oMaxDateStartDtime = oFailureMaxStartDtime;
+                    poLastAnchor.Append(sFailureLastAnchor);
+                }
+                else
+                    oMaxDateStartDtime = oCompletedMaxStartDtime;                    
+            }
+            else
+                oMaxDateStartDtime = oCompletedMaxStartDtime;
+
+            return oMaxDateStartDtime;
+        }
+
+        #endregion
     }
 }
