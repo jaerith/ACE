@@ -177,7 +177,7 @@ AND
         }
 
 
-        public void InitDbMembers()
+        private void InitDbMembers()
         {
             lock (DbLock)
             {
@@ -239,44 +239,82 @@ AND
             DateTime oFailureMaxStartDtime   = DateTime.Now.Subtract(new TimeSpan(30, 0, 0, 0));
             DateTime oMaxDateStartDtime      = DateTime.Now.Subtract(new TimeSpan(30, 0, 0, 0));
 
-            GetMaxStartDtimeCmd.Parameters[@"pid"].Value    = pnProcessID;
-            GetMaxStartDtimeCmd.Parameters[@"status"].Value = CONST_PROCESS_STATUS_COMPLETED;
-            using (SqlDataReader oMaxStartDtimeReader = GetMaxStartDtimeCmd.ExecuteReader())
+            lock (DbLock)
             {
-                if (oMaxStartDtimeReader.Read())
+                GetMaxStartDtimeCmd.Parameters[@"pid"].Value    = pnProcessID;
+                GetMaxStartDtimeCmd.Parameters[@"status"].Value = CONST_PROCESS_STATUS_COMPLETED;
+                using (SqlDataReader oMaxStartDtimeReader = GetMaxStartDtimeCmd.ExecuteReader())
                 {
-                    sCompletedChangeId      = oMaxStartDtimeReader[0].ToString();
-                    sCompletedLastAnchor    = oMaxStartDtimeReader[1].ToString();
-                    oCompletedMaxStartDtime = oMaxStartDtimeReader.GetDateTime(2);
+                    if (oMaxStartDtimeReader.Read())
+                    {
+                        sCompletedChangeId      = oMaxStartDtimeReader[0].ToString();
+                        sCompletedLastAnchor    = oMaxStartDtimeReader[1].ToString();
+                        oCompletedMaxStartDtime = oMaxStartDtimeReader.GetDateTime(2);
+                    }
                 }
-            }
 
-            GetMaxStartDtimeCmd.Parameters[@"pid"].Value    = pnProcessID;
-            GetMaxStartDtimeCmd.Parameters[@"status"].Value = CONST_PROCESS_STATUS_FAILED;
-            using (SqlDataReader oMaxStartDtimeReader = GetMaxStartDtimeCmd.ExecuteReader())
-            {
-                if (oMaxStartDtimeReader.Read())
+                GetMaxStartDtimeCmd.Parameters[@"pid"].Value    = pnProcessID;
+                GetMaxStartDtimeCmd.Parameters[@"status"].Value = CONST_PROCESS_STATUS_FAILED;
+                using (SqlDataReader oMaxStartDtimeReader = GetMaxStartDtimeCmd.ExecuteReader())
                 {
-                    sFailureChangeId      = oMaxStartDtimeReader[0].ToString();
-                    sFailureLastAnchor    = oMaxStartDtimeReader[1].ToString();
-                    oFailureMaxStartDtime = oMaxStartDtimeReader.GetDateTime(2);
+                    if (oMaxStartDtimeReader.Read())
+                    {
+                        sFailureChangeId      = oMaxStartDtimeReader[0].ToString();
+                        sFailureLastAnchor    = oMaxStartDtimeReader[1].ToString();
+                        oFailureMaxStartDtime = oMaxStartDtimeReader.GetDateTime(2);
+                    }
                 }
-            }
 
-            if (oFailureMaxStartDtime > oCompletedMaxStartDtime)
-            {
-                if ((poLastAnchor != null) && !String.IsNullOrEmpty(sFailureLastAnchor))
+                if (oFailureMaxStartDtime > oCompletedMaxStartDtime)
                 {
-                    oMaxDateStartDtime = oFailureMaxStartDtime;
-                    poLastAnchor.Append(sFailureLastAnchor);
+                    if ((poLastAnchor != null) && !String.IsNullOrEmpty(sFailureLastAnchor))
+                    {
+                        oMaxDateStartDtime = oFailureMaxStartDtime;
+                        poLastAnchor.Append(sFailureLastAnchor);
+                    }
+                    else
+                        oMaxDateStartDtime = oCompletedMaxStartDtime;                    
                 }
                 else
-                    oMaxDateStartDtime = oCompletedMaxStartDtime;                    
+                    oMaxDateStartDtime = oCompletedMaxStartDtime;
             }
-            else
-                oMaxDateStartDtime = oCompletedMaxStartDtime;
 
             return oMaxDateStartDtime;
+        }
+
+        /// <summary>
+        /// 
+        /// This method will insert an instance of the configured Process (i.e., the sought enumeration 
+        /// and data retrieval through our target REST API).
+        /// 
+        /// <param name="pnProcessID">The ID of the configured Process in which we are interested</param>
+        /// <returns>The new ID that represents the new instance of this Process</returns>
+        public long InsertProcessInstance(int pnProcessID)
+        {
+            long nNewChangeSeq = -1;
+
+            if (!ValidateDbConnection())
+                InitDbMembers();
+
+            lock (DbLock)
+            {
+                InsertNewProcessInstanceCmd.Parameters[@"process_id"].Value = pnProcessID;
+
+                if (InsertNewProcessInstanceCmd.ExecuteNonQuery() > 0)
+                    nNewChangeSeq = Convert.ToInt64(InsertNewProcessInstanceCmd.Parameters[@"newChangeID"].Value.ToString());
+                else
+                    throw new Exception("ERROR!  Could not create a new Process Instance for ProcessID(" + pnProcessID + ").");
+            }
+
+            return nNewChangeSeq;
+        }
+
+        public bool ValidateDbConnection()
+        {
+            lock (DbLock)
+            {
+                return ((DbConnection != null) && (DbConnection.State == ConnectionState.Open));
+            }
         }
 
         #endregion
