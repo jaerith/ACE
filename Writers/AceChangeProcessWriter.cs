@@ -155,14 +155,14 @@ AND
 
         #region Constructors/Initialization
 
-        public AceChangeProcessWriter(AceConnectionMetadata poPmdStgConnMetadata)
+        public AceChangeProcessWriter(AceConnectionMetadata poStgConnMetadata)
         {
             CurrentProcessID = -1;
             CurrentChangeSeq = -1;
 
             DbLock = new object();
 
-            ConnMetadata = poPmdStgConnMetadata;
+            ConnMetadata = poStgConnMetadata;
 
             InitDbMembers();
         }
@@ -308,6 +308,39 @@ AND
 
             return nNewChangeSeq;
         }
+
+        /// <summary>
+        /// 
+        /// This method will update an instance of the configured Process, setting its status to Complete
+        /// and updating the total records handled during this instance's run.
+        /// 
+        /// <param name="pnChangeSeq">The instance ID of the configured Process</param>
+        /// <param name="pnProcessID">The ID of the configured Process in which we are interested</param>
+        /// <param name="pnProcessID">The number of records retrieved through the enumeration of the API</param>
+        /// <returns>Indicator of whether or not the update succeeded</returns>
+        public bool SetProcessComplete(long pnChangeSeq, int pnProcessID, int nTotalRecords)
+        {
+            bool bSuccess = true;
+            int nErrCd = 0;
+
+            if (!ValidateDbConnection())
+                InitDbMembers();
+
+            lock (DbLock)
+            {
+                SetProcessCompleteCmd.Parameters[@"totrec"].Value = nTotalRecords;
+                SetProcessCompleteCmd.Parameters[@"cid"].Value    = pnChangeSeq;
+                SetProcessCompleteCmd.Parameters[@"pid"].Value    = pnProcessID;
+
+                if (SetProcessCompleteCmd.ExecuteNonQuery() <= 0)
+                    throw new Exception("ERROR!  ceChangeProcessWriter::SetProcessComplete() -> Could not set the row as 'complete' for ChangeSeq(" + pnChangeSeq + "), ProcessD(" + pnProcessID + ")");
+
+                bSuccess = true;
+            }
+
+            return bSuccess;
+        }
+
 
         public bool ValidateDbConnection()
         {
