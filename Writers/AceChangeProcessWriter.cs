@@ -311,17 +311,17 @@ AND
 
         /// <summary>
         /// 
-        /// This method will update an instance of the configured Process, setting its status to Complete
-        /// and updating the total records handled during this instance's run.
+        /// This method will update an instance of the configured Process upon a successful run, setting its status 
+        /// to Complete and updating the total records handled during this instance's run.
         /// 
         /// <param name="pnChangeSeq">The instance ID of the configured Process</param>
         /// <param name="pnProcessID">The ID of the configured Process in which we are interested</param>
-        /// <param name="pnProcessID">The number of records retrieved through the enumeration of the API</param>
+        /// <param name="nTotalRecords">The number of records retrieved through the enumeration of the API</param>
         /// <returns>Indicator of whether or not the update succeeded</returns>
         public bool SetProcessComplete(long pnChangeSeq, int pnProcessID, int nTotalRecords)
         {
             bool bSuccess = true;
-            int nErrCd = 0;
+            int nErrCd    = 0;
 
             if (!ValidateDbConnection())
                 InitDbMembers();
@@ -333,7 +333,7 @@ AND
                 SetProcessCompleteCmd.Parameters[@"pid"].Value    = pnProcessID;
 
                 if (SetProcessCompleteCmd.ExecuteNonQuery() <= 0)
-                    throw new Exception("ERROR!  ceChangeProcessWriter::SetProcessComplete() -> Could not set the row as 'complete' for ChangeSeq(" + pnChangeSeq + "), ProcessD(" + pnProcessID + ")");
+                    throw new Exception("ERROR!  AceChangeProcessWriter::SetProcessComplete() -> Could not set the row as 'complete' for ChangeSeq(" + pnChangeSeq + "), ProcessD(" + pnProcessID + ")");
 
                 bSuccess = true;
             }
@@ -341,6 +341,37 @@ AND
             return bSuccess;
         }
 
+        /// <summary>
+        /// 
+        /// This method will update an instance of the configured Process upon a failed run, setting its status 
+        /// to Error and recording the current anchor (i.e., parameterized URL) on which the enumeration failed
+        /// 
+        /// <param name="pnChangeSeq">The instance ID of the configured Process</param>
+        /// <param name="pnProcessID">The ID of the configured Process in which we are interested</param>
+        /// <param name="psCurrentAnchor">The parameterized URL during which this run failed during the enumeration of the API</param>
+        /// <returns>Indicator of whether or not the update succeeded</returns>
+        public bool SetProcessFailure(long pnChangeSeq, int pnProcessID, string psCurrentAnchor)
+        {
+            bool bSuccess = true;
+            int nErrCd = 0;
+
+            if (!ValidateDbConnection())
+                InitDbMembers();
+
+            lock (DbLock)
+            {
+                SetProcessFailureCmd.Parameters[@"anchor"].Value = psCurrentAnchor;
+                SetProcessFailureCmd.Parameters[@"cid"].Value    = pnChangeSeq;
+                SetProcessFailureCmd.Parameters[@"pid"].Value    = pnProcessID;
+
+                if (SetProcessFailureCmd.ExecuteNonQuery() <= 0)
+                    throw new Exception("ERROR!  AceChangeProcessWriter::SetProcessFailure() -> Could not set the row as 'failed' for ChangeSeq(" + pnChangeSeq + "), ProcessD(" + pnProcessID + ")");
+
+                bSuccess = true;
+            }
+
+            return bSuccess;
+        }
 
         public bool ValidateDbConnection()
         {
