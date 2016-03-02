@@ -344,7 +344,7 @@ AND
         /// <summary>
         /// 
         /// This method will update an instance of the configured Process upon a failed run, setting its status 
-        /// to Error and recording the current anchor (i.e., parameterized URL) on which the enumeration failed
+        /// to Error and recording the current anchor (i.e., parameterized URL) on which the enumeration failed.
         /// 
         /// <param name="pnChangeSeq">The instance ID of the configured Process</param>
         /// <param name="pnProcessID">The ID of the configured Process in which we are interested</param>
@@ -366,6 +366,49 @@ AND
 
                 if (SetProcessFailureCmd.ExecuteNonQuery() <= 0)
                     throw new Exception("ERROR!  AceChangeProcessWriter::SetProcessFailure() -> Could not set the row as 'failed' for ChangeSeq(" + pnChangeSeq + "), ProcessD(" + pnProcessID + ")");
+
+                bSuccess = true;
+            }
+
+            return bSuccess;
+        }
+
+        /// <summary>
+        /// 
+        /// This method will update an instance of the configured Process, recording the current anchor 
+        /// (i.e., parameterized URL) being invoked at a particular stage of the API enumeration.
+        /// 
+        /// <param name="psCurrentAnchor">The parameterized URL being used at this stage of the API enumeration</param>
+        /// <returns>Indicator of whether or not the update succeeded</returns>
+        public bool UpsertAnchor(string psCurrentAnchor)
+        {
+            return UpsertAnchor(this.CurrentChangeSeq, this.CurrentProcessID, psCurrentAnchor);
+        }
+
+        /// <summary>
+        /// 
+        /// This method will update an instance of the configured Process, recording the current anchor 
+        /// (i.e., parameterized URL) being invoked at a particular stage of the API enumeration.
+        /// 
+        /// <param name="pnChangeSeq">The instance ID of the configured Process</param>
+        /// <param name="pnProcessID">The definition ID of the configured Process in which we are interested</param>
+        /// <param name="psCurrentAnchor">The parameterized URL used at this point of the API enumeration</param>
+        /// <returns>Indicator of whether or not the update succeeded</returns>
+        public bool UpsertAnchor(long pnChangeSeq, int pnProcessID, string psCurrentAnchor)
+        {
+            bool bSuccess = true;
+
+            if (!ValidateDbConnection())
+                InitDbMembers();
+
+            lock (DbLock)
+            {
+                UpdateProcessAnchorCmd.Parameters[@"anchor"].Value = psCurrentAnchor;
+                UpdateProcessAnchorCmd.Parameters[@"cid"].Value    = pnChangeSeq;
+                UpdateProcessAnchorCmd.Parameters[@"pid"].Value    = pnProcessID;
+
+                if (UpdateProcessAnchorCmd.ExecuteNonQuery() <= 0)
+                    throw new Exception("ERROR!  AceChangeProcessWriter::UpsertAnchor() -> Could not update the anchor for ChangeSeq(" + pnChangeSeq + "), ProcessD(" + pnProcessID + ")");
 
                 bSuccess = true;
             }
