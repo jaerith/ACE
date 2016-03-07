@@ -416,6 +416,11 @@ AND
             return bSuccess;
         }
 
+        /// <summary>
+        /// 
+        /// This method will validate the current status of the member property that is the connection to our database.
+        /// 
+        /// <returns>Indicator of whether or not the DB connection is still alive</returns>
         public bool ValidateDbConnection()
         {
             lock (DbLock)
