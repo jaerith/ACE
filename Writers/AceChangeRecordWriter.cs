@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -44,10 +46,29 @@ VALUES
 
         #endregion
 
-        public AceChangeRecordWriter()
-        { }
+        private object moDbLock;
+
+        private SqlConnection DbConnection;
+        private SqlCommand    InsertNewProductInstance;
+
+        private AceConnectionMetadata ConnectionMetadata;
+
+        public AceChangeRecordWriter(AceConnectionMetadata poConnMetadata)
+        {
+            moDbLock = new object();
+
+            ConnectionMetadata = poConnMetadata;
+
+            // InitDbMembers();
+        }
 
         public void Dispose()
-        { }
+        { 
+            if (DbConnection != null)
+            {
+                DbConnection.Close();
+                DbConnection = null;
+            }
+        }
     }
 }
