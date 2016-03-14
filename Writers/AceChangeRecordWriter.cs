@@ -34,7 +34,7 @@ namespace ACE.Writers
 
         #region Insert Record Instance
 
-        private string msInsertProductInstanceSql =
+        private const string InsertProductInstanceSql =
 @"
 INSERT INTO
     ace_change_product(change_id, ean, notification, data)
@@ -59,7 +59,7 @@ VALUES
 
             ConnectionMetadata = poConnMetadata;
 
-            // InitDbMembers();
+            InitDbMembers();
         }
 
         public void Dispose()
@@ -68,6 +68,22 @@ VALUES
             {
                 DbConnection.Close();
                 DbConnection = null;
+            }
+        }
+
+        public void InitDbMembers()
+        {
+            lock (moDbLock)
+            {
+                // Works Server
+                DbConnection = new SqlConnection(ConnectionMetadata.DBConnectionString);
+                DbConnection.Open();
+
+                InsertNewProductInstance = new SqlCommand(InsertProductInstanceSql, DbConnection);
+                InsertNewProductInstance.Parameters.Add(new SqlParameter(@"cid",         SqlDbType.BigInt));
+                InsertNewProductInstance.Parameters.Add(new SqlParameter(@"ean",         SqlDbType.BigInt));
+                InsertNewProductInstance.Parameters.Add(new SqlParameter(@"notify_body", SqlDbType.Text));
+                InsertNewProductInstance.Parameters.Add(new SqlParameter(@"data_body",   SqlDbType.Text));
             }
         }
     }
