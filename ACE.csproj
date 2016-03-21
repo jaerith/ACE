@@ -48,7 +48,7 @@
     <Compile Include="DB\Factory\AceMetadataFactory.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Readers\AceChangeProductReader.cs" />
+    <Compile Include="Readers\AceChangeRecordReader.cs" />
     <Compile Include="Readers\AceXmlReader.cs" />
     <Compile Include="Writers\AceChangeProcessWriter.cs" />
     <Compile Include="Writers\AceChangeRecordWriter.cs" />
