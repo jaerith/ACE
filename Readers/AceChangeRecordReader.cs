@@ -23,7 +23,7 @@ namespace ACE.Readers
     /// iterate through the record's data payloads and parse them into manageable buckets.
     ///     
     /// </summary>
-    public class AceChangeRecordReader : IDisposable // , IEnumerable
+    public class AceChangeRecordReader : IDisposable , IEnumerable
     {
         #region SQL
 
@@ -53,11 +53,108 @@ ORDER BY
             DbConnMetadata = poDbConnMetadata;
             AceProcess     = poAceProcess;
 
-            // InitDBMembers();
+            DbConnection     = null;
+            RetrieveProducts = null;
+            ProductReader    = null;
+
+            InitDBMembers();
+
+            StartEnumerator();
         }
 
         public void Dispose()
         {
+            if (ProductReader != null)
+            {
+                ProductReader.Close();
+                ProductReader.Dispose();
+                ProductReader = null;
+            }
+
+            if (DbConnection != null)
+            {
+                DbConnection.Close();
+                DbConnection.Dispose();
+                DbConnection = null;
+            }
+        }
+
+        private void InitDBMembers()
+        {
+            DbConnection = new SqlConnection(DbConnMetadata.DBConnectionString);
+            DbConnection.Open();
+
+            RetrieveProducts = new SqlCommand(CONST_RETRIEVE_RECORDS_SQL, DbConnection);
+            RetrieveProducts.CommandTimeout = 120;
+            RetrieveProducts.Parameters.Add(new SqlParameter(@"cid", SqlDbType.BigInt));
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return (IEnumerator)GetEnumerator();
+        }
+
+        public AceProductEnumerator GetEnumerator()
+        {
+            return new AceProductEnumerator(this, ProductReader);
+        }
+
+        public void StartEnumerator()
+        {
+            Dispose();
+            InitDBMembers();
+
+            RetrieveProducts.Parameters[@"cid"].Value = AceProcess.ChangeSeq;
+            ProductReader = RetrieveProducts.ExecuteReader();
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// This subclass will assist with the enumeration of the data records.
+    ///     
+    /// </summary>
+    public class AceProductEnumerator : IEnumerator
+    {
+        private AceChangeRecordReader RecordReader = null;
+        private SqlDataReader         DataReader   = null;
+        private Hashtable             CurrRecord   = null;
+
+        public AceProductEnumerator(AceChangeRecordReader poRecordReader, SqlDataReader poDataReader)
+        {
+            RecordReader = poRecordReader;
+            DataReader   = poDataReader;
+        }
+
+        public bool MoveNext()
+        {
+            bool bResult;
+
+            bResult = DataReader.Read();
+
+            if (bResult)
+            {
+                CurrRecord = new Hashtable();
+
+                // AceChangeRecordReader.PopulateProductData(moDataReader, moProductReader.AceJob.DataAPIConfiguration, moCurrProduct);
+            }
+            else
+                CurrRecord = null;
+
+            return bResult;
+        }
+
+        public void Reset()
+        {
+            return;
+        }
+
+        public object Current
+        {
+            get
+            {
+                return CurrRecord;
+            }
         }
     }
 }
