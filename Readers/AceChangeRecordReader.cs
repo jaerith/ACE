@@ -107,6 +107,62 @@ ORDER BY
             RetrieveProducts.Parameters[@"cid"].Value = AceProcess.ChangeSeq;
             ProductReader = RetrieveProducts.ExecuteReader();
         }
+
+        /// <summary>
+        /// 
+        /// This method will populate a provided Hashtable with data retrieved through the provided SqlDataReader.
+        /// After obtaining the data payload of the target record, it will use the metadata's XPath values to 
+        /// parse the payload and pull out values of interest.
+        /// 
+        /// <param name="poNewProductReader">The Reader that is enumerating through the dataset of payloads (which were pulled via the REST API)</param>
+        /// <param name="poTmpConfig">The configuration for the currently running Process</param>
+        /// <param name="poNewProductRecord">The container that will hold the values parsed from the raw data payload for our record (i.e. product)</param>
+        /// <returns>None</returns>
+        static public void PopulateProductData(SqlDataReader poNewProductReader, AceAPIConfiguration poTmpConfig, Hashtable poNewProductRecord)
+        {
+            string    sDataRecord = poNewProductReader[0].ToString();
+            string    sXPath      = null;
+            XDocument oDataDoc    = null;
+
+            if (!sDataRecord.Contains("<errors>") && !sDataRecord.Contains("<error>"))
+            {
+                using (StringReader oDataReader = new StringReader(sDataRecord))
+                {
+                    oDataDoc = XDocument.Load(oDataReader, LoadOptions.PreserveWhitespace);
+                }
+
+                foreach (string sTmpBucketName in poTmpConfig.ApplyBuckets.Keys)
+                {
+                    AceAPIBucket oTempBucket = poTmpConfig.ApplyBuckets[sTmpBucketName];
+
+                    foreach (string sTmpAttrName in oTempBucket.SoughtAttrXPaths.Keys)
+                    {
+                        sXPath = oTempBucket.SoughtAttrXPaths[sTmpAttrName];
+
+                        try
+                        {
+                            if (oTempBucket.SoughtAttrXmlBodies.Keys.Contains(sTmpAttrName) && oTempBucket.SoughtAttrXmlBodies[sTmpAttrName])
+                            {
+                                if (oDataDoc.XPathSelectElement(sXPath) != null)
+                                    poNewProductRecord[sTmpAttrName] = oDataDoc.XPathSelectElement(sXPath).ToString();
+                            }
+                            else if (oDataDoc.XPathSelectElement(sXPath) != null)
+                                poNewProductRecord[sTmpAttrName] = oDataDoc.XPathSelectElement(sXPath).Value;
+                        }
+                        catch (Exception ex)
+                        {
+                            // Any logging should occur here
+                            throw ex;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Any logging should occur here
+                poNewProductRecord["error"] = sDataRecord;
+            }
+        }
     }
 
     /// <summary>
