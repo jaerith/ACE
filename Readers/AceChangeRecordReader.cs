@@ -48,6 +48,11 @@ ORDER BY
         private SqlCommand    RetrieveProducts = null;
         private SqlDataReader ProductReader    = null;
 
+        public AceProcess ProcessConfiguration
+        {
+            get { return AceProcess; }
+        }
+
         public AceChangeRecordReader(AceConnectionMetadata poDbConnMetadata, AceProcess poAceProcess)
         {
             DbConnMetadata = poDbConnMetadata;
@@ -192,7 +197,7 @@ ORDER BY
             {
                 CurrRecord = new Hashtable();
 
-                // AceChangeRecordReader.PopulateProductData(moDataReader, moProductReader.AceJob.DataAPIConfiguration, moCurrProduct);
+                AceChangeRecordReader.PopulateProductData(DataReader, RecordReader.ProcessConfiguration.DataAPIConfiguration, CurrRecord);
             }
             else
                 CurrRecord = null;
