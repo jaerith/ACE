@@ -41,7 +41,6 @@ namespace ACE
         private bool   SystemActive      = true;
         private bool   TaskTimedOut      = false;
         private bool   UseTaskMaxTime    = false;
-        private bool   UseScribe         = false;
         private string LogDirectory      = "";
         private string CurrentRunLogFile = "";
         private object ThreadLock        = new object();
@@ -62,7 +61,6 @@ namespace ACE
 
         #endregion
 
-
         #region Public Methods
 
         public void ExecuteOnce()
@@ -73,9 +71,9 @@ namespace ACE
             {
                 var oThreadWaitSpan = new TimeSpan(0, 30, 0);
 
-                /*
                 InitMembers();
 
+                /*
                 LogInfo(sSubject, "DEBUG : Starting AceEngine");
 
                 Thread oConsumptionThread = SpawnConsumptionThread();
@@ -104,6 +102,29 @@ namespace ACE
             }
         }
 
+        #endregion
+
+        #region Init Methods
+        private void InitMembers()
+        {
+            string   sFormatString      = "user id={0};password={1};database={2};server={3};connection timeout=120;";
+            string[] asConnectionParams = new string[4];
+
+            moStgConnectionMetadata = new AceConnectionMetadata();
+
+            DebugFlag      = Properties.Settings.Default.DEBUG_MODE;
+            UseTaskMaxTime = Properties.Settings.Default.USE_TASK_MAX_TIME;
+            LogDirectory   = Properties.Settings.Default.LOG_DIRECTORY;
+
+            asConnectionParams[0] = moStgConnectionMetadata.DBUser     = Properties.Settings.Default.ACE_DB_USER;
+            asConnectionParams[1] = moStgConnectionMetadata.DBPassword = Properties.Settings.Default.ACE_DB_PASSWORD;
+            asConnectionParams[2] = moStgConnectionMetadata.DBTarget   = Properties.Settings.Default.ACE_DB_TARGET;
+            asConnectionParams[3] = moStgConnectionMetadata.DBMachine  = Properties.Settings.Default.ACE_DB_MACHINE;
+            moStgConnectionMetadata.DBConnectionString = string.Format(sFormatString, asConnectionParams);
+
+            // InitLogging();
+
+        } // method()
         #endregion
     }
 }

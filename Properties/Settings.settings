@@ -1,0 +1,27 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ACE.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ACE_DB_PASSWORD" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">testuser123</Value>
+    </Setting>
+    <Setting Name="DEBUG_MODE" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="USE_TASK_MAX_TIME" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="LOG_DIRECTORY" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\tmp\logs\ace_engine</Value>
+    </Setting>
+    <Setting Name="ACE_DB_USER" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">testuser</Value>
+    </Setting>
+    <Setting Name="ACE_DB_TARGET" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">TestDB</Value>
+    </Setting>
+    <Setting Name="ACE_DB_MACHINE" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">TestMachine</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
