@@ -73,9 +73,9 @@ namespace ACE
 
                 InitMembers();
 
-                /*
                 LogInfo(sSubject, "DEBUG : Starting AceEngine");
 
+                /*
                 Thread oConsumptionThread = SpawnConsumptionThread();
 
                 if (UseTaskMaxTime)
@@ -86,17 +86,13 @@ namespace ACE
             }
             catch (Exception ex)
             {
-                /*
                 LogError(sSubject, "----------------------------------------------------------------");
                 LogError(sSubject, "ERROR!  An error has taken place.", ex);
                 LogError(sSubject, "----------------------------------------------------------------");
-                */
             }
             finally
             {
-                /*
                 LogInfo(sSubject, "DEBUG : Finished AceEngine");
-                 */
 
                 Dispose();
             }
@@ -105,6 +101,17 @@ namespace ACE
         #endregion
 
         #region Init Methods
+
+        private void InitLogging()
+        {
+            if (!Directory.Exists(LogDirectory))
+                throw new Exception("ERROR!  Directory(" + LogDirectory + ") does not exist.");
+
+            CurrentRunLogFile     = LogDirectory + "\\AceEngine." + DateTime.Now.ToString("yyyyMMdd_hhmmss") + ".log";
+            moCurrentRunLogWriter = new StreamWriter(CurrentRunLogFile);
+            System.Console.SetOut(moCurrentRunLogWriter);
+        }
+
         private void InitMembers()
         {
             string   sFormatString      = "user id={0};password={1};database={2};server={3};connection timeout=120;";
@@ -122,9 +129,27 @@ namespace ACE
             asConnectionParams[3] = moStgConnectionMetadata.DBMachine  = Properties.Settings.Default.ACE_DB_MACHINE;
             moStgConnectionMetadata.DBConnectionString = string.Format(sFormatString, asConnectionParams);
 
-            // InitLogging();
+            InitLogging();
 
         } // method()
+
+        private void LogError(string psSubject, string psLogMsg)
+        {
+            Console.WriteLine(psSubject + " : " + psLogMsg + "..." + DateTime.Now);
+            Console.Out.Flush();
+        }
+
+        private void LogError(string psSubject, string psLogMsg, Exception poException)
+        {
+            Console.WriteLine(psSubject + " : " + psLogMsg + " -> (\n" + poException + "\n)..." + DateTime.Now);
+            Console.Out.Flush();
+        }
+
+        private void LogInfo(string psSubject, string psLogMsg)
+        {
+            Console.WriteLine(psSubject + " : " + psLogMsg + "..." + DateTime.Now);
+        }
+
         #endregion
     }
 }
