@@ -148,6 +148,7 @@ namespace ACE
         private void LogInfo(string psSubject, string psLogMsg)
         {
             Console.WriteLine(psSubject + " : " + psLogMsg + "..." + DateTime.Now);
+            // Console.Out.Flush();
         }
 
         #endregion
