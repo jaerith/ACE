@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 using ACE.DB.Classes;
+using ACE.DB.Factory;
+using ACE.Readers;
+using ACE.Writers;
 
 namespace ACE
 {
@@ -75,14 +79,12 @@ namespace ACE
 
                 LogInfo(sSubject, "DEBUG : Starting AceEngine");
 
-                /*
                 Thread oConsumptionThread = SpawnConsumptionThread();
 
                 if (UseTaskMaxTime)
                     oConsumptionThread.Join(oThreadWaitSpan);
                 else
                     oConsumptionThread.Join();
-               */
             }
             catch (Exception ex)
             {
@@ -133,6 +135,9 @@ namespace ACE
 
         } // method()
 
+        #endregion
+
+        #region Logging Methods
         private void LogError(string psSubject, string psLogMsg)
         {
             Console.WriteLine(psSubject + " : " + psLogMsg + "..." + DateTime.Now);
@@ -150,7 +155,68 @@ namespace ACE
             Console.WriteLine(psSubject + " : " + psLogMsg + "..." + DateTime.Now);
             // Console.Out.Flush();
         }
+        #endregion
 
+        #region Threading Methods
+
+        /// <summary>
+        /// 
+        /// This method serves as the main logic of this function, for each Process performing the 4 main steps addressed 
+        /// in the description of the class.  Those 4 steps can be generalized into just 2 steps, both driven by metadata:
+        /// 
+        /// 1.) The record (i.e., product) data will be pulled down through the REST API in raw form
+        /// 2.) The record (i.e., product) data will then be applied (i.e., upserted) to a staging table
+        /// 
+        /// <returns>None.</returns>
+        private void ConsumeData()
+        {
+            string sSubject = "AceEngine::ConsumeData()";
+
+            try
+            {
+                using (AceMetadataFactory MetadataFactory = new AceMetadataFactory(moStgConnectionMetadata))
+                {
+                    using (AceChangeProcessWriter oProcessWriter = new AceChangeProcessWriter(moStgConnectionMetadata))
+                    {
+                        using (AceChangeRecordWriter oProductWriter = new AceChangeRecordWriter(moStgConnectionMetadata))
+                        {
+                            List<AceProcess> CurrentJobs = MetadataFactory.GetActiveJobs();
+
+                            foreach (AceProcess TempProcess in CurrentJobs)
+                            {
+                                LogInfo(sSubject, "Processing Job [" + TempProcess.ProcessID + "] : (" + TempProcess.ProcessName + ")");
+                                System.Console.Out.Flush();
+
+                                /*
+                                PullDataSnapshot(oProcessWriter, oProductWriter, oTempJob);
+                                System.Console.Out.Flush();
+
+                                ApplyDataSnapshot(oTempJob);
+                                System.Console.Out.Flush();
+                                */
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(sSubject, "ERROR!  An error has taken place with record", ex);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// This method will return the thread that executes the main logic of this program.
+        /// 
+        /// <returns>The main logical thread of this program</returns>
+        private Thread SpawnConsumptionThread()
+        {
+            Thread oSpawnConsumptionThread = new Thread(ConsumeData);
+            oSpawnConsumptionThread.Start();
+
+            return oSpawnConsumptionThread;
+        }
         #endregion
     }
 }
