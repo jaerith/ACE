@@ -157,6 +157,43 @@ namespace ACE
         }
         #endregion
 
+        #region Support Methods
+
+        /// <summary>
+        /// 
+        /// According to the direction of the metadata for each configured process, this method will retrieve data through
+        /// a specified REST API and then persist the returned raw payloads into a table for later usage.
+        /// 
+        /// <param name="poProcessWriter">The writer that will record the progress of this instance for the configured Process (represented by 'poTempProcess')</param>
+        /// <param name="poProductWriter">The writer that will record the raw payload for each record retrieved in this run</param>
+        /// <param name="poTempProcess">The structure that represents the Process being currently run</param>
+        /// <returns>The ChangeSeq (i.e., PID) assigned to this particular instance of the Process being run</returns>
+        /// </summary>
+        private long PullDataSnapshot(AceChangeProcessWriter poProcessWriter, AceChangeRecordWriter poProductWriter, AceProcess poTempProcess)
+        {
+            bool   bSuccess       = true;
+            int    nTotalRecords  = 0;
+            long   nTmpKey        = 0;
+            string sInfoMsg       = "";
+            string sErrMsg        = "";
+            string sSubject       = "AceEngine::PullDataSnapshot()";
+            string sTmpKey        = "";
+            string sTmpChangeBody = "";
+            string sTmpDataBody   = "";
+
+            StringBuilder sbLastAnchor = new StringBuilder();
+
+            Dictionary<string, string> oTmpFilterArgs = new Dictionary<string, string>();
+
+            /*
+             * Implementation here
+             */
+
+            return poTempProcess.ChangeSeq;
+        }
+
+        #endregion
+
         #region Threading Methods
 
         /// <summary>
@@ -187,10 +224,10 @@ namespace ACE
                                 LogInfo(sSubject, "Processing Job [" + TempProcess.ProcessID + "] : (" + TempProcess.ProcessName + ")");
                                 System.Console.Out.Flush();
 
-                                /*
-                                PullDataSnapshot(oProcessWriter, oProductWriter, oTempJob);
+                                PullDataSnapshot(oProcessWriter, oProductWriter, TempProcess);
                                 System.Console.Out.Flush();
 
+                                /*
                                 ApplyDataSnapshot(oTempJob);
                                 System.Console.Out.Flush();
                                 */
