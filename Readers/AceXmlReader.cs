@@ -26,8 +26,11 @@ namespace ACE.Readers
 
         public delegate bool FoundNewAnchor(string psNewAnchor);
 
-        public const int    CONST_WEB_REQUEST_TIMEOUT_MS    = 60000;
-        public const string CONST_DEFAULT_RESPONSE_XML_BODY = "body";
+        public const int    CONST_WEB_REQUEST_TIMEOUT_MS                 = 60000;
+        public const string CONST_DEFAULT_CHG_MANIFEST_REQUEST_XML_BODY  = "<Provide a default change manifest request XML body here>";
+        public const string CONST_DEFAULT_CHG_MANIFEST_RESPONSE_XML_BODY = "<Provide a default change manifest response XML body here>";
+        public const string CONST_DEFAULT_DATA_REQUEST_XML_BODY          = "<Provide a default data request XML body here>";
+        public const string CONST_DEFAULT_DATA_RESPONSE_XML_BODY         = "<Provide a default data response XML body here>";
 
         #endregion
 

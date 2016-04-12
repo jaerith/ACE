@@ -161,6 +161,58 @@ namespace ACE
 
         /// <summary>
         /// 
+        /// According to the direction of the metadata of the configured process, this method will retrieve data through
+        /// a specified REST API in regard to a particular list of identified records.
+        /// 
+        /// <param name="poProcessWriter">The writer that will record the progress of this instance for the configured Process (represented by 'poProcess')</param>
+        /// <param name="poRecordWriter">The writer that will record the raw payload for each record retrieved in this run</param>
+        /// <param name="poProcess">The structure that represents the Process being currently run</param>
+        /// <returns>The ChangeSeq (i.e., PID) assigned to this particular instance of the Process being run</returns>
+        /// </summary>
+        private long PullDataForHardCodedKeys(AceChangeProcessWriter poProcessWriter, AceChangeRecordWriter poRecordWriter, AceProcess poProcess)
+        {
+            long   nTmpKey        = -1;
+            string sTmpChangeBody = "";
+            string sTmpDataBody   = "";
+            string sInfoMsg       = "";
+            string sErrMsg        = "";
+            string sSubject       = "AceEngine::PullDataForHardCodedKeys()";
+
+            Dictionary<string, string> oTmpFilterArgs = new Dictionary<string, string>();
+
+            if ((poProcess.ChangeAPIConfiguration.KeyList == null) || (poProcess.ChangeAPIConfiguration.KeyList.Count <= 0))
+                throw new Exception("ERROR!  No expected items found in the hard-coded key list.");
+
+            poProcess.ChangeSeq = poProcessWriter.InsertProcessInstance(poProcess.ProcessID);
+
+            foreach (string sTmpKey in poProcess.ChangeAPIConfiguration.KeyList)
+            {
+                // The format for this change manifest request can be hard-coded (as it is here) or it could be a part of the configurable metadata
+                sTmpChangeBody = String.Format(AceXmlReader.CONST_DEFAULT_CHG_MANIFEST_REQUEST_XML_BODY, sTmpKey);
+
+                try
+                {
+                    nTmpKey = Convert.ToInt64(sTmpKey);
+                }
+                catch (Exception ex)
+                {
+                    LogError(sSubject,  "ERROR!  Could not convert EAN (" + sTmpKey + ") to a number",  ex);
+                }
+
+                oTmpFilterArgs = AceXmlReader.ExtractFilterArgs(sTmpChangeBody, poProcess.DataAPIConfiguration.RequestFilterArgs);
+                sTmpDataBody   = AceXmlReader.PullData(poProcess.DataAPIConfiguration.BaseURL, oTmpFilterArgs);
+
+                if (!String.IsNullOrEmpty(sTmpKey))
+                    poRecordWriter.InsertProductInstance(poProcess.ChangeSeq, nTmpKey, sTmpChangeBody, sTmpDataBody);
+                else
+                    LogError(sSubject, "ERROR!  Provided key was null");
+            }
+
+            return poProcess.ChangeSeq;
+        }
+
+        /// <summary>
+        /// 
         /// According to the direction of the metadata for each configured process, this method will retrieve data through
         /// a specified REST API and then persist the returned raw payloads into a table for later usage.
         /// 
