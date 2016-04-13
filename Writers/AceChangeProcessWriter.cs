@@ -220,6 +220,34 @@ AND
 
         /// <summary>
         /// 
+        /// This method will query the database in order to detect whether or not the last instance of the configured Process
+        /// concluded with a failure.  If so, we will retrieve the last URL recorded while enumerating through the REST API,
+        /// so that we may resume the enumeration that stopped with the previous failure.
+        /// 
+        /// <param name="pnProcessID">The ID of the configured Process in which we are interested</param>
+        /// <param name="poLastAnchor">The container of the last URL attempt in the previously failed run (i.e., enumeration of the REST API)</param>
+        /// <returns>The ID representing the instance of the Process that failed previously</returns>
+        public long DetectPreviousFailure(int pnProcessID, StringBuilder poLastAnchor)
+        {
+            long nChangeID = -1;
+
+            GetPreviousProcessFailureCmd.Parameters[@"pid"].Value = pnProcessID;
+            using (SqlDataReader oPreviousProcessFailureReader = GetPreviousProcessFailureCmd.ExecuteReader())
+            {
+                if (oPreviousProcessFailureReader.Read())
+                {
+                    nChangeID = Convert.ToInt64(oPreviousProcessFailureReader[0].ToString());
+
+                    if (poLastAnchor != null)
+                        poLastAnchor.Append(oPreviousProcessFailureReader[1].ToString());
+                }
+            }
+
+            return nChangeID;
+        }
+
+        /// <summary>
+        /// 
         /// This method will retrieve the last run time for our configured process.  If the last process
         /// ran successfully, then only the DateTime will be returned.  However, if the last process failed
         /// during its enumeration of the API (in which it supposedly called the REST API repeatedly to
