@@ -237,6 +237,36 @@ namespace ACE
 
             Dictionary<string, string> oTmpFilterArgs = new Dictionary<string, string>();
 
+            // If there is no change URL specified, we can assume that the records are retrieved as either a hard-coded list or a full set
+            if (String.IsNullOrEmpty(poTempProcess.ChangeAPIConfiguration.BaseURL.Trim()))
+            {
+                long nChangeSeq = -1;
+
+                try
+                {
+                    nTotalRecords = poTempProcess.ChangeAPIConfiguration.KeyList.Count;
+
+                    nChangeSeq = PullDataForHardCodedKeys(poProcessWriter, poProductWriter, poTempProcess);
+                    return nChangeSeq;
+                }
+                finally
+                {
+                    if (nChangeSeq > 0)
+                        poProcessWriter.SetProcessComplete(poTempProcess.ChangeSeq, poTempProcess.ProcessID, nTotalRecords);
+                }
+            }
+
+            // If there is a change URL specified, we process normally by acquiring the delta manifest and then retrieving the delta records
+            if ((poTempProcess.ChangeSeq = poProcessWriter.DetectPreviousFailure(poTempProcess.ProcessID, sbLastAnchor)) > 0)
+            {
+                string sLastAnchor = sbLastAnchor.ToString();
+
+                if (!String.IsNullOrEmpty(sLastAnchor))
+                    poTempProcess.ChangeAPIConfiguration.CurrentAnchor = sLastAnchor;
+            }
+            else
+                poTempProcess.ChangeSeq = poProcessWriter.InsertProcessInstance(poTempProcess.ProcessID);
+
             /*
              * Implementation here
              */
