@@ -267,6 +267,46 @@ namespace ACE
             else
                 poTempProcess.ChangeSeq = poProcessWriter.InsertProcessInstance(poTempProcess.ProcessID);
 
+            // Indicates that the first pull of the delta data has not yet happened
+            if (String.IsNullOrEmpty(poTempProcess.ChangeAPIConfiguration.CurrentAnchor))
+            {
+                sbLastAnchor = new StringBuilder();
+
+                DateTime oMaxStartDtime = poProcessWriter.GetMaxStartDtime(poTempProcess.ProcessID, sbLastAnchor);
+
+                if (!String.IsNullOrEmpty(poTempProcess.ChangeAPIConfiguration.SinceURLArg))
+                {
+                    string sSinceURLArg = poTempProcess.ChangeAPIConfiguration.SinceURLArg;
+
+                    if (sbLastAnchor.Length <= 0)
+                        poTempProcess.ChangeAPIConfiguration.CurrentAnchor = sbLastAnchor.ToString();
+                    else if (poTempProcess.ChangeAPIConfiguration.RequestFilterArgs.ContainsKey(sSinceURLArg))
+                    {
+                        string sSinceValue = poTempProcess.ChangeAPIConfiguration.RequestFilterArgs[sSinceURLArg];
+                        if (sSinceValue.EndsWith("d"))
+                        {
+                            int      nDays       = Convert.ToInt32(sSinceValue.Remove(sSinceValue.IndexOf('d')));
+                            DateTime oSinceDtime = DateTime.Now.Subtract(new TimeSpan(nDays, 0, 0, 0, 0));
+
+                            // For the Epoch calculation, our local time needs to be converted to universal time (i.e., GMT)
+                            TimeSpan epochTimespan           = oSinceDtime.ToUniversalTime() - new DateTime(1970, 1, 1);
+                            long     nMillisecondsSinceEpoch = (long)(epochTimespan.TotalSeconds * 1000);
+
+                            poTempProcess.ChangeAPIConfiguration.RequestFilterArgs[sSinceURLArg] = Convert.ToString(nMillisecondsSinceEpoch);
+                        }
+                    }
+                    else
+                    {
+                        // For the Epoch calculation, our local time needs to be converted to universal time (i.e., GMT)
+                        DateTime tenMinutesEarlier       = oMaxStartDtime.Subtract(new TimeSpan(0, 0, 15, 0, 0));
+                        TimeSpan epochTimespan           = tenMinutesEarlier.ToUniversalTime() - new DateTime(1970, 1, 1);
+                        long     nMillisecondsSinceEpoch = (long)(epochTimespan.TotalSeconds * 1000);
+
+                        poTempProcess.ChangeAPIConfiguration.RequestFilterArgs[sSinceURLArg] = Convert.ToString(nMillisecondsSinceEpoch);
+                    }
+                }
+            }
+
             /*
              * Implementation here
              */
