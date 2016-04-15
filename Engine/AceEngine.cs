@@ -307,6 +307,9 @@ namespace ACE
                 }
             }
 
+            poProcessWriter.CurrentProcessID = poTempProcess.ProcessID;
+            poProcessWriter.CurrentChangeSeq = poTempProcess.ChangeSeq;
+
             /*
              * Implementation here
              */
