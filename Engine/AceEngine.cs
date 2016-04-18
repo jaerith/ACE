@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -159,6 +162,87 @@ namespace ACE
 
         #region Support Methods
 
+        private bool EnumerateApiAndPersistRawData(AceChangeProcessWriter poProcessWriter, AceChangeRecordWriter poProductWriter, AceProcess poTempProcess)
+        {
+            bool   bSuccess       = true;
+            int    nTotalRecords  = 0;
+            long   nTmpKey        = 0;
+            string sTmpKey        = "";
+            string sTmpChangeBody = "";
+            string sSubject       = "AceEngine::EnumerateApiAndPersistRawData()";
+            string sErrMsg        = "";
+
+            using (AceXmlReader oChangeDataReader = new AceXmlReader(poTempProcess.ChangeAPIConfiguration))
+            {
+                oChangeDataReader.FoundNewAnchorCallback = poProcessWriter.UpsertAnchor;
+
+                try
+                {
+                    foreach (Hashtable oTmpRecord in oChangeDataReader)
+                    {
+                        try
+                        {
+                            sTmpKey        = (string) oTmpRecord[poTempProcess.ChangeAPIConfiguration.TargetKeyTag];
+                            sTmpChangeBody = (string) oTmpRecord[AceXmlReader.CONST_RESPONSE_XML_BODY_KEY];
+
+                            try
+                            {
+                                nTmpKey = Convert.ToInt64(sTmpKey);
+                            }
+                            catch (Exception ex)
+                            {
+                                LogError(sSubject, "ERROR!  Could not convert EAN (" + sTmpKey + ") to a number", ex);
+                            }
+
+                            /*
+                             * Finish implementation
+                             */
+
+                        }
+                        catch (Exception ex)
+                        {
+                            sErrMsg = "ERROR!  Could not handle product instance for EAN (" + sTmpKey + ")";
+
+                            LogError(sSubject, sErrMsg, ex);
+                        }
+                        finally
+                        {
+                            ++nTotalRecords;
+                        }
+
+                        if ((nTotalRecords % 1000) == 0)
+                        {
+                            LogInfo(sSubject, "Pulled (" + nTotalRecords + ") snapshots to the change_product table");
+                            Console.Out.Flush();
+                        }
+                    } // foreach loop
+                }
+                catch (WebException ex)
+                {
+                    sErrMsg = "ERROR!  Web connection issues when attempting to get catalog data...pulling snapshot is stopping now.";
+                    LogError(sSubject, sErrMsg, ex);
+
+                    bSuccess = false;
+                }
+                catch (SqlException ex)
+                {
+                    sErrMsg = "ERROR!  Database issues when attempting to get catalog data...pulling snapshot is stopping now.";
+                    LogError(sSubject, sErrMsg, ex);
+
+                    bSuccess = false;
+                }
+                catch (Exception ex)
+                {
+                    sErrMsg = "ERROR!  General issue when attempting to get catalog data...pulling snapshot is stopping now.";
+                    LogError(sSubject, sErrMsg, ex);
+
+                    bSuccess = false;
+                }
+            }
+
+            return bSuccess;
+        }
+
         /// <summary>
         /// 
         /// According to the direction of the metadata of the configured process, this method will retrieve data through
@@ -309,6 +393,8 @@ namespace ACE
 
             poProcessWriter.CurrentProcessID = poTempProcess.ProcessID;
             poProcessWriter.CurrentChangeSeq = poTempProcess.ChangeSeq;
+
+            EnumerateApiAndPersistRawData(poProcessWriter, poProductWriter, poTempProcess);
 
             /*
              * Implementation here
