@@ -26,6 +26,8 @@ namespace ACE.Readers
 
         public delegate bool FoundNewAnchor(string psNewAnchor);
 
+        public static string CONST_RESPONSE_XML_BODY_KEY = "body";
+
         public const int    CONST_WEB_REQUEST_TIMEOUT_MS                 = 60000;
         public const string CONST_DEFAULT_CHG_MANIFEST_REQUEST_XML_BODY  = "<Provide a default change manifest request XML body here>";
         public const string CONST_DEFAULT_CHG_MANIFEST_RESPONSE_XML_BODY = "<Provide a default change manifest response XML body here>";
@@ -465,8 +467,8 @@ namespace ACE.Readers
                                && x.XPathSelectElement(EnumAPIConfiguration.ResponseFilterPath).Value != null
                             select new Hashtable()
                             {
-                                { EnumAPIConfiguration.TargetKeyTag, x.Element(EnumAPIConfiguration.TargetKeyTag).Value }, 
-                                { "body",                            x.ToString() }
+                                { EnumAPIConfiguration.TargetKeyTag,        x.Element(EnumAPIConfiguration.TargetKeyTag).Value }, 
+                                { AceXmlReader.CONST_RESPONSE_XML_BODY_KEY, x.ToString() }
                             }
                         ).ToList();
                 }
@@ -480,8 +482,8 @@ namespace ACE.Readers
                             // where x.
                             select new Hashtable()
                             {
-                                { EnumAPIConfiguration.TargetKeyTag, x.Element(EnumAPIConfiguration.TargetKeyTag).Value }, 
-                                { "body",                            x.ToString() }
+                                { EnumAPIConfiguration.TargetKeyTag,        x.Element(EnumAPIConfiguration.TargetKeyTag).Value }, 
+                                { AceXmlReader.CONST_RESPONSE_XML_BODY_KEY, x.ToString() }
                             }
                         ).ToList();
                 }
