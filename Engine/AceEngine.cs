@@ -162,6 +162,16 @@ namespace ACE
 
         #region Support Methods
 
+        /// <summary>
+        /// 
+        /// This method will do the actual work of enumerating through the REST API and making the web requests for data,
+        /// both the change manifests that direct calls and/or the actual data.
+        /// 
+        /// <param name="poProcessWriter">The writer that will record the progress of this instance for the configured Process (represented by 'poTempProcess')</param>
+        /// <param name="poProductWriter">The writer that will record the raw payload for each record retrieved in this run</param>
+        /// <param name="poTempProcess">The structure that represents the Process being currently run</param>
+        /// <returns>The boolean that indicates whether or not the enumeration and persistence succeeded</returns>
+        /// </summary>
         private bool EnumerateApiAndPersistRawData(AceChangeProcessWriter poProcessWriter, AceChangeRecordWriter poProductWriter, AceProcess poTempProcess)
         {
             bool   bSuccess       = true;
@@ -169,8 +179,11 @@ namespace ACE
             long   nTmpKey        = 0;
             string sTmpKey        = "";
             string sTmpChangeBody = "";
+            string sTmpDataBody   = "";
             string sSubject       = "AceEngine::EnumerateApiAndPersistRawData()";
             string sErrMsg        = "";
+
+            Dictionary<string, string> oTmpFilterArgs = new Dictionary<string, string>();
 
             using (AceXmlReader oChangeDataReader = new AceXmlReader(poTempProcess.ChangeAPIConfiguration))
             {
@@ -194,9 +207,27 @@ namespace ACE
                                 LogError(sSubject, "ERROR!  Could not convert EAN (" + sTmpKey + ") to a number", ex);
                             }
 
-                            /*
-                             * Finish implementation
-                             */
+                            if (!String.IsNullOrEmpty(sTmpKey))
+                            {
+                                oTmpFilterArgs = AceXmlReader.ExtractFilterArgs(sTmpChangeBody, poTempProcess.DataAPIConfiguration.RequestFilterArgs);
+
+                                try
+                                {
+                                    sTmpDataBody = AceXmlReader.PullData(poTempProcess.DataAPIConfiguration.BaseURL, oTmpFilterArgs);
+                                }
+                                catch (WebException ex)
+                                {
+                                    sErrMsg = "ERROR!  Web connection issues occurred when handling EAN (" + sTmpKey + ")";
+
+                                    LogError(sSubject, sErrMsg, ex);
+
+                                    sTmpDataBody = CONST_DATA_URL_ISSUE_ERR_MSG;
+                                }
+
+                                poProductWriter.InsertProductInstance(poTempProcess.ChangeSeq, nTmpKey, sTmpChangeBody, sTmpDataBody);
+                            }
+                            else
+                                LogError(sSubject, "ERROR!  A provided key was null.");
 
                         }
                         catch (Exception ex)
@@ -297,8 +328,9 @@ namespace ACE
 
         /// <summary>
         /// 
-        /// According to the direction of the metadata for each configured process, this method will retrieve data through
-        /// a specified REST API and then persist the returned raw payloads into a table for later usage.
+        /// According to the direction of the metadata for each configured process, this method will then determine the next actions
+        /// that should be taken, using various state data (like the status of the last run) to make a determination.  Then, it will
+        /// retrieve data through a specified REST API and then persist the returned raw payloads into a table for later usage.
         /// 
         /// <param name="poProcessWriter">The writer that will record the progress of this instance for the configured Process (represented by 'poTempProcess')</param>
         /// <param name="poProductWriter">The writer that will record the raw payload for each record retrieved in this run</param>
@@ -307,15 +339,7 @@ namespace ACE
         /// </summary>
         private long PullDataSnapshot(AceChangeProcessWriter poProcessWriter, AceChangeRecordWriter poProductWriter, AceProcess poTempProcess)
         {
-            bool   bSuccess       = true;
-            int    nTotalRecords  = 0;
-            long   nTmpKey        = 0;
-            string sInfoMsg       = "";
-            string sErrMsg        = "";
-            string sSubject       = "AceEngine::PullDataSnapshot()";
-            string sTmpKey        = "";
-            string sTmpChangeBody = "";
-            string sTmpDataBody   = "";
+            int nTotalRecords = 0;
 
             StringBuilder sbLastAnchor = new StringBuilder();
 
@@ -369,12 +393,12 @@ namespace ACE
                         string sSinceValue = poTempProcess.ChangeAPIConfiguration.RequestFilterArgs[sSinceURLArg];
                         if (sSinceValue.EndsWith("d"))
                         {
-                            int      nDays       = Convert.ToInt32(sSinceValue.Remove(sSinceValue.IndexOf('d')));
+                            int nDays = Convert.ToInt32(sSinceValue.Remove(sSinceValue.IndexOf('d')));
                             DateTime oSinceDtime = DateTime.Now.Subtract(new TimeSpan(nDays, 0, 0, 0, 0));
 
                             // For the Epoch calculation, our local time needs to be converted to universal time (i.e., GMT)
-                            TimeSpan epochTimespan           = oSinceDtime.ToUniversalTime() - new DateTime(1970, 1, 1);
-                            long     nMillisecondsSinceEpoch = (long)(epochTimespan.TotalSeconds * 1000);
+                            TimeSpan epochTimespan = oSinceDtime.ToUniversalTime() - new DateTime(1970, 1, 1);
+                            long nMillisecondsSinceEpoch = (long)(epochTimespan.TotalSeconds * 1000);
 
                             poTempProcess.ChangeAPIConfiguration.RequestFilterArgs[sSinceURLArg] = Convert.ToString(nMillisecondsSinceEpoch);
                         }
@@ -382,9 +406,9 @@ namespace ACE
                     else
                     {
                         // For the Epoch calculation, our local time needs to be converted to universal time (i.e., GMT)
-                        DateTime tenMinutesEarlier       = oMaxStartDtime.Subtract(new TimeSpan(0, 0, 15, 0, 0));
-                        TimeSpan epochTimespan           = tenMinutesEarlier.ToUniversalTime() - new DateTime(1970, 1, 1);
-                        long     nMillisecondsSinceEpoch = (long)(epochTimespan.TotalSeconds * 1000);
+                        DateTime tenMinutesEarlier = oMaxStartDtime.Subtract(new TimeSpan(0, 0, 15, 0, 0));
+                        TimeSpan epochTimespan = tenMinutesEarlier.ToUniversalTime() - new DateTime(1970, 1, 1);
+                        long nMillisecondsSinceEpoch = (long)(epochTimespan.TotalSeconds * 1000);
 
                         poTempProcess.ChangeAPIConfiguration.RequestFilterArgs[sSinceURLArg] = Convert.ToString(nMillisecondsSinceEpoch);
                     }
@@ -394,10 +418,17 @@ namespace ACE
             poProcessWriter.CurrentProcessID = poTempProcess.ProcessID;
             poProcessWriter.CurrentChangeSeq = poTempProcess.ChangeSeq;
 
-            EnumerateApiAndPersistRawData(poProcessWriter, poProductWriter, poTempProcess);
+            if (EnumerateApiAndPersistRawData(poProcessWriter, poProductWriter, poTempProcess))
+            {
+                // Handle success
+            }
+            else
+            {
+                // Handle failure
+            }
 
             /*
-             * Implementation here
+             * Finish implementation here
              */
 
             return poTempProcess.ChangeSeq;
