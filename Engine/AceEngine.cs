@@ -339,7 +339,8 @@ namespace ACE
         /// </summary>
         private long PullDataSnapshot(AceChangeProcessWriter poProcessWriter, AceChangeRecordWriter poProductWriter, AceProcess poTempProcess)
         {
-            int nTotalRecords = 0;
+            int    nTotalRecords = 0;
+            string sSubject      = "AceEngine::PullDataSnapshot()";
 
             StringBuilder sbLastAnchor = new StringBuilder();
 
@@ -420,16 +421,14 @@ namespace ACE
 
             if (EnumerateApiAndPersistRawData(poProcessWriter, poProductWriter, poTempProcess))
             {
-                // Handle success
+                LogInfo(sSubject, "Setting the Change ID [" + poTempProcess.ChangeSeq + "] to a success!");
+                poProcessWriter.SetProcessComplete(poTempProcess.ChangeSeq, poTempProcess.ProcessID, nTotalRecords);
             }
             else
             {
-                // Handle failure
+                LogInfo(sSubject, "Setting the Change ID [" + poTempProcess.ChangeSeq + "] to a failure!");
+                poProcessWriter.SetProcessFailure(poTempProcess.ChangeSeq, poTempProcess.ProcessID, poTempProcess.ChangeAPIConfiguration.CurrentAnchor);
             }
-
-            /*
-             * Finish implementation here
-             */
 
             return poTempProcess.ChangeSeq;
         }
