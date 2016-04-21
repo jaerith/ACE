@@ -164,6 +164,41 @@ namespace ACE
 
         /// <summary>
         /// 
+        /// After the enumeration of the REST API is complete, this method will enumerate through the raw payloads that
+        /// were retrieved; it will then use metadata in order to parse and then load the data into specific table columns.
+        /// 
+        /// <param name="poProcess">The structure that represents the Process being currently run</param>
+        /// <returns>None</returns>
+        /// </summary>
+        private void ApplyDataSnapshot(AceProcess poProcess)
+        {
+            int nTotalRecords  = 0;
+            int nFailedRecords = 0;
+
+            string sSubject = "PmdAceConsumptionServiceImpl::ApplyDataSnapshot()";
+
+            Hashtable oCurrRecord = new Hashtable();
+
+            try
+            {
+                using (AceChangeRecordReader oRecordReader = new AceChangeRecordReader(moStgConnectionMetadata, poProcess))
+                {
+                    /*
+                     * Complete implementation
+                     */
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(sSubject,
+                         "ERROR!  An error has taken place with record -> Contents: (" + oCurrRecord.ToString() + ")",
+                         ex);
+            }
+
+        } // method()
+
+        /// <summary>
+        /// 
         /// This method will do the actual work of enumerating through the REST API and making the web requests for data,
         /// both the change manifests that direct calls and/or the actual data.
         /// 
@@ -468,10 +503,8 @@ namespace ACE
                                 PullDataSnapshot(oProcessWriter, oProductWriter, TempProcess);
                                 System.Console.Out.Flush();
 
-                                /*
-                                ApplyDataSnapshot(oTempJob);
+                                ApplyDataSnapshot(TempProcess);
                                 System.Console.Out.Flush();
-                                */
                             }
                         }
                     }
