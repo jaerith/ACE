@@ -14,7 +14,7 @@ using ACE.DB.Factory;
 using ACE.Readers;
 using ACE.Writers;
 
-namespace ACE
+namespace ACE.Engine
 {
     /// <summary>
     /// 
@@ -177,25 +177,47 @@ namespace ACE
 
             string sSubject = "PmdAceConsumptionServiceImpl::ApplyDataSnapshot()";
 
-            Hashtable oCurrRecord = new Hashtable();
+            Hashtable CurrRecord = new Hashtable();
 
             try
             {
+                Dictionary<string, IApplicable> BucketApplyManagers = CreateApplyManagers(poProcess);
+
                 using (AceChangeRecordReader oRecordReader = new AceChangeRecordReader(moStgConnectionMetadata, poProcess))
                 {
-                    /*
-                     * Complete implementation
-                     */
+                    foreach (Hashtable oTempRecord in oRecordReader)
+                    {
+                        // Finish implementation here
+                    }
                 }
             }
             catch (Exception ex)
             {
                 LogError(sSubject,
-                         "ERROR!  An error has taken place with record -> Contents: (" + oCurrRecord.ToString() + ")",
+                         "ERROR!  An error has taken place with record -> Contents: (" + CurrRecord.ToString() + ")",
                          ex);
             }
 
         } // method()
+
+        /// <summary>
+        /// 
+        /// Using the metadata of the designated process, this method will create a mapping between the logical buckets 
+        /// of a raw data payload (like a composite XML body of a document) to a table and its various columns.
+        /// 
+        /// <param name="poProcess">The structure that represents the Process being currently run</param>
+        /// <returns>None</returns>
+        /// </summary>
+        private Dictionary<string, IApplicable> CreateApplyManagers(AceProcess poProcess)
+        {
+            Dictionary<string, IApplicable> ApplyManagers = new Dictionary<string, IApplicable>();
+
+            /*
+             * Complete your own implementation here
+             */
+
+            return ApplyManagers;
+        }
 
         /// <summary>
         /// 
