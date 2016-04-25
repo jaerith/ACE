@@ -104,7 +104,7 @@ ORDER BY
             return new AceProductEnumerator(this, ProductReader);
         }
 
-        public void StartEnumerator()
+        private void StartEnumerator()
         {
             Dispose();
             InitDBMembers();
