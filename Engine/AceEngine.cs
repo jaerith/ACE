@@ -185,9 +185,25 @@ namespace ACE.Engine
 
                 using (AceChangeRecordReader oRecordReader = new AceChangeRecordReader(moStgConnectionMetadata, poProcess))
                 {
-                    foreach (Hashtable oTempRecord in oRecordReader)
+                    foreach (Hashtable TempRecord in oRecordReader)
                     {
-                        // Finish implementation here
+                        CurrRecord = TempRecord;
+
+                        // We should probably have a better way of detecting successful records vs. error records
+                        if (TempRecord.Count > 1)
+                        {
+                            // Finish implementation here
+                        }
+                        else
+                            nFailedRecords++;
+
+                        nTotalRecords++;
+
+                        if ((nTotalRecords % 1000) == 0)
+                        {
+                            LogInfo(sSubject, "Applied (" + nTotalRecords + ") records to the staging table(s)");
+                            Console.Out.Flush();
+                        }
                     }
                 }
             }
@@ -197,6 +213,45 @@ namespace ACE.Engine
                          "ERROR!  An error has taken place with record -> Contents: (" + CurrRecord.ToString() + ")",
                          ex);
             }
+
+        } // method()
+
+        /// <summary>
+        /// 
+        /// Using the metadata for the configured Process, this method will determinen whether or not any values
+        /// for a designated Bucket are present in the current record parsed from the raw data payload.
+        /// 
+        /// <param name="poProcess">The structure that represents the Process being currently run</param>
+        /// <param name="psBucketName">The logical Bucket currently being targeted by the running instance of the Process</param>
+        /// <param name="poRecord">The current record parsed from the raw data payload and which will be applied to the Bucket's target table/columns</param>
+        /// <returns>A boolean indicating whether or not the record has any relevant values that belong to the logical Bucket</returns>
+        /// </summary>
+        private bool AreBucketValuesPresent(AceProcess poProcess, string psBucketName, Hashtable poRecord)
+        {
+            bool         bValuesPresent = false;
+            List<string> oKeys          = null;
+            AceAPIBucket oBucket        = null;
+
+            if (!poProcess.DataAPIConfiguration.ApplyBuckets.ContainsKey(psBucketName))
+                return false;
+
+            oBucket = poProcess.DataAPIConfiguration.ApplyBuckets[psBucketName];
+
+            foreach (string sTmpAttrName in oBucket.SoughtAttributes.Keys)
+            {
+                if (!oBucket.AttrKeys.Contains(sTmpAttrName))
+                {
+                    string sTmpVal = (string) poRecord[sTmpAttrName];
+
+                    if (!String.IsNullOrEmpty(sTmpVal))
+                    {
+                        bValuesPresent = true;
+                        break;
+                    }
+                }
+            }
+
+            return bValuesPresent;
 
         } // method()
 
