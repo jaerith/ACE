@@ -192,7 +192,15 @@ namespace ACE.Engine
                         // We should probably have a better way of detecting successful records vs. error records
                         if (TempRecord.Count > 1)
                         {
-                            // Finish implementation here
+                            foreach (string sTmpBucketName in BucketApplyManagers.Keys)
+                            {
+                                if (AreBucketValuesPresent(poProcess, sTmpBucketName, TempRecord))
+                                {
+                                    IApplicable ApplyManager = BucketApplyManagers[sTmpBucketName];
+
+                                    ApplyManager.UpsertRecord(TempRecord);
+                                }
+                            }
                         }
                         else
                             nFailedRecords++;
