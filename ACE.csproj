@@ -47,7 +47,8 @@
     <Compile Include="DB\Classes\AceConnectionMetadata.cs" />
     <Compile Include="DB\Classes\AceProcess.cs" />
     <Compile Include="DB\Factory\AceMetadataFactory.cs" />
-    <Compile Include="Engine\IApplicable.cs" />
+    <Compile Include="Writers\AceApplyManager.cs" />
+    <Compile Include="Writers\IApplicable.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Readers\AceChangeRecordReader.cs" />
