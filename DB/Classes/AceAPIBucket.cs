@@ -36,32 +36,32 @@ namespace ACE.DB.Classes
 
         public void Init()
         {
-            AttrKeys = new HashSet<string>();
+            ColKeys = new HashSet<string>();
 
-            SoughtAttributes    = new Dictionary<string, SqlDbType>();
-            SoughtAttrKeys      = new Dictionary<string, bool>();
-            SoughtAttrLengths   = new Dictionary<string, int>();
-            SoughtAttrXPaths    = new Dictionary<string, string>();
-            SoughtAttrXmlBodies = new Dictionary<string, bool>();
+            SoughtColumns      = new Dictionary<string, SqlDbType>();
+            SoughtColKeys      = new Dictionary<string, bool>();
+            SoughtColLengths   = new Dictionary<string, int>();
+            SoughtColXPaths    = new Dictionary<string, string>();
+            SoughtColXmlBodies = new Dictionary<string, bool>();
         }
 
         #region Properties
 
-        public HashSet<string> AttrKeys { get; set; }
+        public HashSet<string> ColKeys { get; set; }
 
         public string BucketName { get; set; }
 
         public string TableName { get; set; }
 
-        public Dictionary<string, SqlDbType> SoughtAttributes { get; set; }
+        public Dictionary<string, SqlDbType> SoughtColumns { get; set; }
 
-        public Dictionary<string, bool> SoughtAttrKeys { get; set; }
+        public Dictionary<string, bool> SoughtColKeys { get; set; }
 
-        public Dictionary<string, int> SoughtAttrLengths { get; set; }
+        public Dictionary<string, int> SoughtColLengths { get; set; }
 
-        public Dictionary<string, string> SoughtAttrXPaths { get; set; }
+        public Dictionary<string, string> SoughtColXPaths { get; set; }
 
-        public Dictionary<string, bool> SoughtAttrXmlBodies { get; set; }
+        public Dictionary<string, bool> SoughtColXmlBodies { get; set; }
 
         #endregion
 
@@ -79,16 +79,16 @@ namespace ACE.DB.Classes
         /// <param name="pbIsXmlBody">The indicator of whether the XPath points to a single node's value or a composite that should be serialized</param>
         /// <returns>None.</returns>
         /// </summary>
-        public void AddAttribute(string psName, SqlDbType poType, bool pbIsKey, int pnLength, string psXPath, bool pbIsXmlBody)
+        public void AddTargetColumn(string psName, SqlDbType poType, bool pbIsKey, int pnLength, string psXPath, bool pbIsXmlBody)
         {
-            SoughtAttributes[psName]    = poType;
-            SoughtAttrKeys[psName]      = pbIsKey;
-            SoughtAttrLengths[psName]   = pnLength;
-            SoughtAttrXPaths[psName]    = psXPath;
-            SoughtAttrXmlBodies[psName] = pbIsXmlBody;
+            SoughtColumns[psName]      = poType;
+            SoughtColKeys[psName]      = pbIsKey;
+            SoughtColLengths[psName]   = pnLength;
+            SoughtColXPaths[psName]    = psXPath;
+            SoughtColXmlBodies[psName] = pbIsXmlBody;
 
             if (pbIsKey)
-                AttrKeys.Add(psName);
+                ColKeys.Add(psName);
         }
 
         #endregion
