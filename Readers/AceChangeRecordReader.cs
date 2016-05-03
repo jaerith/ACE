@@ -140,13 +140,13 @@ ORDER BY
                 {
                     AceAPIBucket oTempBucket = poTmpConfig.ApplyBuckets[sTmpBucketName];
 
-                    foreach (string sTmpAttrName in oTempBucket.SoughtAttrXPaths.Keys)
+                    foreach (string sTmpAttrName in oTempBucket.SoughtColXPaths.Keys)
                     {
-                        sXPath = oTempBucket.SoughtAttrXPaths[sTmpAttrName];
+                        sXPath = oTempBucket.SoughtColXPaths[sTmpAttrName];
 
                         try
                         {
-                            if (oTempBucket.SoughtAttrXmlBodies.Keys.Contains(sTmpAttrName) && oTempBucket.SoughtAttrXmlBodies[sTmpAttrName])
+                            if (oTempBucket.SoughtColXmlBodies.Keys.Contains(sTmpAttrName) && oTempBucket.SoughtColXmlBodies[sTmpAttrName])
                             {
                                 if (oDataDoc.XPathSelectElement(sXPath) != null)
                                     poNewProductRecord[sTmpAttrName] = oDataDoc.XPathSelectElement(sXPath).ToString();

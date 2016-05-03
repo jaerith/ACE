@@ -442,7 +442,7 @@ ORDER BY
                     if (!String.IsNullOrEmpty(sAttrIsXmlBody))
                         bIsXmlBody = (sAttrIsXmlBody == "Y") ? true : false;
 
-                    oTmpBucket.AddAttribute(sAttrName, oOraDbType, bIsKey, nAttrLen, sAttrXPath, bIsXmlBody); 
+                    oTmpBucket.AddTargetColumn(sAttrName, oOraDbType, bIsKey, nAttrLen, sAttrXPath, bIsXmlBody); 
                 }
             }
         }

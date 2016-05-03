@@ -245,9 +245,9 @@ namespace ACE.Engine
 
             oBucket = poProcess.DataAPIConfiguration.ApplyBuckets[psBucketName];
 
-            foreach (string sTmpAttrName in oBucket.SoughtAttributes.Keys)
+            foreach (string sTmpAttrName in oBucket.SoughtColumns.Keys)
             {
-                if (!oBucket.AttrKeys.Contains(sTmpAttrName))
+                if (!oBucket.ColKeys.Contains(sTmpAttrName))
                 {
                     string sTmpVal = (string) poRecord[sTmpAttrName];
 
