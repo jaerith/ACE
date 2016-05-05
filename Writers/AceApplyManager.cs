@@ -135,16 +135,50 @@ namespace ACE.Writers
                 }
             }
 
-            return new SqlCommand(SelectStatement.ToString(), DbConn);
+            return RetrieveCommand;
         }
 
         private SqlCommand InitInsertCommand(AceAPIBucket poBucketConfiguration)
         {
-            StringBuilder InsertStatement = new StringBuilder("INSERT INTO " + poBucketConfiguration.TableName + "(");
+            StringBuilder InsertStatement = new StringBuilder();
+            StringBuilder ValuesClause    = new StringBuilder();
 
-            // Finish implementation
+            foreach (string sTmpColumn in poBucketConfiguration.SoughtColumns.Keys)
+            {
+                if (InsertStatement.Length > 0)
+                {
+                    InsertStatement.Append(", ");
+                    ValuesClause.Append(",");
+                }
+                else
+                {
+                    InsertStatement.Append("INSERT INTO " + poBucketConfiguration.TableName + "(");
+                    ValuesClause.Append(" VALUES(");
+                }
 
-            return new SqlCommand(InsertStatement.ToString(), DbConn);
+                InsertStatement.Append(sTmpColumn);
+                ValuesClause.Append("@" + sTmpColumn);
+            }
+
+            
+            ValuesClause.Append(")");
+            InsertStatement.Append(")" + ValuesClause.ToString());
+
+            SqlCommand NewInsertCommand = new SqlCommand(InsertStatement.ToString(), DbConn);
+
+            foreach (string sTmpColumn in poBucketConfiguration.SoughtColumns.Keys)
+            {
+                SqlDbType TargetType = poBucketConfiguration.SoughtColumns[sTmpColumn];
+                if (poBucketConfiguration.SoughtColLengths.Keys.Contains(sTmpColumn))
+                {
+                    int TargetLen = poBucketConfiguration.SoughtColLengths[sTmpColumn];
+                    NewInsertCommand.Parameters.Add(new SqlParameter(sTmpColumn, TargetType, TargetLen));
+                }
+                else
+                    NewInsertCommand.Parameters.Add(new SqlParameter(sTmpColumn, TargetType));
+            }
+
+            return NewInsertCommand;
         }
 
         private SqlCommand InitUpdateCommand(AceAPIBucket poBucketConfiguration)
