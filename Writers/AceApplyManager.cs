@@ -183,9 +183,43 @@ namespace ACE.Writers
 
         private SqlCommand InitUpdateCommand(AceAPIBucket poBucketConfiguration)
         {
-            StringBuilder UpdateStatement = new StringBuilder("UPDATE " + poBucketConfiguration.TableName + " SET ");
+            StringBuilder UpdateStatement = new StringBuilder();
+            StringBuilder UpdateClause    = new StringBuilder();
 
-            // Finish implementation
+            foreach (string sTmpColumn in poBucketConfiguration.SoughtColumns.Keys)
+            {
+                if (UpdateStatement.Length > 0)
+                {
+                    UpdateStatement.Append(", ");
+                    UpdateClause.Append(" AND ");
+                }
+                else 
+                {
+                    UpdateStatement.Append("UPDATE " + poBucketConfiguration.TableName + " SET ");
+                    UpdateClause.Append(" WHERE ");
+                }
+
+                if (!poBucketConfiguration.ColKeys.Contains(sTmpColumn))
+                    UpdateStatement.Append(sTmpColumn + " = @" + sTmpColumn);
+                else
+                    UpdateClause.Append(sTmpColumn + " = @" + sTmpColumn);
+            }
+
+            UpdateStatement.Append(")" + UpdateClause.ToString());
+
+            SqlCommand NewUpdateCommand = new SqlCommand(UpdateStatement.ToString(), DbConn);
+
+            foreach (string sTmpColumn in poBucketConfiguration.SoughtColumns.Keys)
+            {
+                SqlDbType TargetType = poBucketConfiguration.SoughtColumns[sTmpColumn];
+                if (poBucketConfiguration.SoughtColLengths.Keys.Contains(sTmpColumn))
+                {
+                    int TargetLen = poBucketConfiguration.SoughtColLengths[sTmpColumn];
+                    NewUpdateCommand.Parameters.Add(new SqlParameter(sTmpColumn, TargetType, TargetLen));
+                }
+                else
+                    NewUpdateCommand.Parameters.Add(new SqlParameter(sTmpColumn, TargetType));
+            }
 
             return new SqlCommand(UpdateStatement.ToString(), DbConn);
         }
