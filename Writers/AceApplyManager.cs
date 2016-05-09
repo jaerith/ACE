@@ -120,20 +120,7 @@ namespace ACE.Writers
 
             SqlCommand RetrieveCommand = new SqlCommand(SelectStatement.ToString(), DbConn);
 
-            foreach (string sTmpColumn in poBucketConfiguration.SoughtColumns.Keys)
-            {
-                if (poBucketConfiguration.ColKeys.Contains(sTmpColumn))
-                {
-                    SqlDbType TargetType = poBucketConfiguration.SoughtColumns[sTmpColumn];
-                    if (poBucketConfiguration.SoughtColLengths.Keys.Contains(sTmpColumn))
-                    {
-                        int TargetLen = poBucketConfiguration.SoughtColLengths[sTmpColumn];
-                        RetrieveCommand.Parameters.Add(new SqlParameter(sTmpColumn, TargetType, TargetLen));
-                    }
-                    else
-                        RetrieveCommand.Parameters.Add(new SqlParameter(sTmpColumn, TargetType));
-                }
-            }
+            PrepareParemeters(RetrieveCommand, poBucketConfiguration);
 
             return RetrieveCommand;
         }
@@ -166,17 +153,7 @@ namespace ACE.Writers
 
             SqlCommand NewInsertCommand = new SqlCommand(InsertStatement.ToString(), DbConn);
 
-            foreach (string sTmpColumn in poBucketConfiguration.SoughtColumns.Keys)
-            {
-                SqlDbType TargetType = poBucketConfiguration.SoughtColumns[sTmpColumn];
-                if (poBucketConfiguration.SoughtColLengths.Keys.Contains(sTmpColumn))
-                {
-                    int TargetLen = poBucketConfiguration.SoughtColLengths[sTmpColumn];
-                    NewInsertCommand.Parameters.Add(new SqlParameter(sTmpColumn, TargetType, TargetLen));
-                }
-                else
-                    NewInsertCommand.Parameters.Add(new SqlParameter(sTmpColumn, TargetType));
-            }
+            PrepareParemeters(NewInsertCommand, poBucketConfiguration);
 
             return NewInsertCommand;
         }
@@ -209,19 +186,24 @@ namespace ACE.Writers
 
             SqlCommand NewUpdateCommand = new SqlCommand(UpdateStatement.ToString(), DbConn);
 
+            PrepareParemeters(NewUpdateCommand, poBucketConfiguration);
+
+            return new SqlCommand(UpdateStatement.ToString(), DbConn);
+        }
+
+        private void PrepareParemeters(SqlCommand poCommand, AceAPIBucket poBucketConfiguration)
+        {
             foreach (string sTmpColumn in poBucketConfiguration.SoughtColumns.Keys)
             {
                 SqlDbType TargetType = poBucketConfiguration.SoughtColumns[sTmpColumn];
                 if (poBucketConfiguration.SoughtColLengths.Keys.Contains(sTmpColumn))
                 {
                     int TargetLen = poBucketConfiguration.SoughtColLengths[sTmpColumn];
-                    NewUpdateCommand.Parameters.Add(new SqlParameter(sTmpColumn, TargetType, TargetLen));
+                    poCommand.Parameters.Add(new SqlParameter(sTmpColumn, TargetType, TargetLen));
                 }
                 else
-                    NewUpdateCommand.Parameters.Add(new SqlParameter(sTmpColumn, TargetType));
+                    poCommand.Parameters.Add(new SqlParameter(sTmpColumn, TargetType));
             }
-
-            return new SqlCommand(UpdateStatement.ToString(), DbConn);
         }
 
         #endregion
