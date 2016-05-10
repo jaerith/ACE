@@ -56,8 +56,9 @@ namespace ACE.Writers
         /// This method will intialize the prepared statements that will be constructed via direction 
         /// from the provided metadata.  These statements will then be used to 
         /// 
-        /// <param name="poBucketConfiguration">The data from the configured Process</param>
+        /// <param name="poBucketConfiguration">The configuration for the logical bucket (i.e., a table and a subset of its columns)</param>
         /// <returns>The ID representing the instance of the Process that failed previously</returns>
+        /// </summary>
         public bool InitPreparedStatements(AceAPIBucket poBucketConfiguration)
         {
             CountCommand    = InitCountCommand(poBucketConfiguration);
@@ -85,6 +86,13 @@ namespace ACE.Writers
 
         #region Support Methods
 
+        /// <summary>
+        /// 
+        /// This method will initialize the Count prepared statement.
+        /// 
+        /// <param name="poBucketConfiguration">The configuration for the logical bucket (i.e., a table and a subset of its columns)</param>
+        /// <returns>Prepared statement that returns the Count of rows in the target table</returns>
+        /// </summary>
         private SqlCommand InitCountCommand(AceAPIBucket poBucketConfiguration)
         {
             StringBuilder CountStatement = new StringBuilder("SELECT COUNT(*) FROM " + poBucketConfiguration.TableName);
@@ -92,6 +100,13 @@ namespace ACE.Writers
             return new SqlCommand(CountStatement.ToString(), DbConn);
         }
 
+        /// <summary>
+        /// 
+        /// This method will initialize the Select prepared statement.
+        /// 
+        /// <param name="poBucketConfiguration">The configuration for the logical bucket (i.e., a table and a subset of its columns)</param>
+        /// <returns>Prepared statement that returns a particular row based on the provided key</returns>
+        /// </summary>
         private SqlCommand InitSelectCommand(AceAPIBucket poBucketConfiguration)
         {
             StringBuilder SelectStatement = new StringBuilder("SELECT ");
@@ -125,6 +140,13 @@ namespace ACE.Writers
             return RetrieveCommand;
         }
 
+        /// <summary>
+        /// 
+        /// This method will initialize the Insert prepared statement.
+        /// 
+        /// <param name="poBucketConfiguration">The configuration for the logical bucket (i.e., a table and a subset of its columns)</param>
+        /// <returns>Prepared statement that inserts a row to the logical Bucket</returns>
+        /// </summary>
         private SqlCommand InitInsertCommand(AceAPIBucket poBucketConfiguration)
         {
             StringBuilder InsertStatement = new StringBuilder();
@@ -158,6 +180,13 @@ namespace ACE.Writers
             return NewInsertCommand;
         }
 
+        /// <summary>
+        /// 
+        /// This method will initialize the Insert prepared statement.
+        /// 
+        /// <param name="poBucketConfiguration">The configuration for the logical bucket (i.e., a table and a subset of its columns)</param>
+        /// <returns>Prepared statement that inserts a row to the logical Bucket</returns>
+        /// </summary>
         private SqlCommand InitUpdateCommand(AceAPIBucket poBucketConfiguration)
         {
             StringBuilder UpdateStatement = new StringBuilder();
@@ -191,6 +220,14 @@ namespace ACE.Writers
             return new SqlCommand(UpdateStatement.ToString(), DbConn);
         }
 
+        /// <summary>
+        /// 
+        /// This method will create the parameters for the prepared statement.
+        /// 
+        /// <param name="poCommand">The preparement statement to which we will add the needed parameters</param>
+        /// <param name="poBucketConfiguration">The configuration for the logical bucket (i.e., a table and a subset of its columns)</param>
+        /// <returns>None</returns>
+        /// </summary>
         private void PrepareParemeters(SqlCommand poCommand, AceAPIBucket poBucketConfiguration)
         {
             foreach (string sTmpColumn in poBucketConfiguration.SoughtColumns.Keys)
