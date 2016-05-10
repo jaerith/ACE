@@ -29,6 +29,7 @@ namespace ACE.Writers
     /// NOTE: In this code, each record is identified through an EAN, which is a 
     /// standard identifier for books. However, it could easily be replaced by another identifier.
     ///     
+    /// </summary>
     public class AceChangeRecordWriter : IDisposable
     {
         #region SQL
@@ -98,6 +99,7 @@ VALUES
         /// <param name="psNotificationBody">The raw payload of the change manifest (if available) that triggered the pull of this EAN</param>
         /// <param name="psDataBody">The raw payload of the product's actual data</param>
         /// <returns>Indicator of whether or not the entry has been inserted successfully</returns>
+        /// </summary>
         public bool InsertProductInstance(long pnChangeSeq, long pnEAN, string psNotificationBody, string psDataBody)
         {
             bool bResult = true;
@@ -125,6 +127,7 @@ VALUES
         /// This method will validate the current status of the member property that is the connection to our database.
         /// 
         /// <returns>Indicator of whether or not the DB connection is still alive</returns>
+        /// </summary>
         public bool ValidateDbConnection()
         {
             lock (moDbLock)

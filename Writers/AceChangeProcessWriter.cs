@@ -227,6 +227,7 @@ AND
         /// <param name="pnProcessID">The ID of the configured Process in which we are interested</param>
         /// <param name="poLastAnchor">The container of the last URL attempt in the previously failed run (i.e., enumeration of the REST API)</param>
         /// <returns>The ID representing the instance of the Process that failed previously</returns>
+        /// </summary>
         public long DetectPreviousFailure(int pnProcessID, StringBuilder poLastAnchor)
         {
             long nChangeID = -1;
@@ -257,6 +258,7 @@ AND
         /// <param name="pnProcessID">The ID of the configured Process in which we are interested</param>
         /// <param name="poLastAnchor">The container of the last URL attempt in the previously failed run (i.e., enumeration of the REST API)</param>
         /// <returns>The starting time of the last run for the Process</returns>
+        /// </summary>
         public DateTime GetMaxStartDtime(int pnProcessID, StringBuilder poLastAnchor)
         {
             string   sCompletedChangeId      = "";
@@ -317,6 +319,7 @@ AND
         /// 
         /// <param name="pnProcessID">The ID of the configured Process in which we are interested</param>
         /// <returns>The new ID that represents the new instance of this Process</returns>
+        /// </summary>
         public long InsertProcessInstance(int pnProcessID)
         {
             long nNewChangeSeq = -1;
@@ -346,6 +349,7 @@ AND
         /// <param name="pnProcessID">The ID of the configured Process in which we are interested</param>
         /// <param name="nTotalRecords">The number of records retrieved through the enumeration of the API</param>
         /// <returns>Indicator of whether or not the update succeeded</returns>
+        /// </summary>
         public bool SetProcessComplete(long pnChangeSeq, int pnProcessID, int nTotalRecords)
         {
             bool bSuccess = true;
@@ -378,6 +382,7 @@ AND
         /// <param name="pnProcessID">The ID of the configured Process in which we are interested</param>
         /// <param name="psCurrentAnchor">The parameterized URL during which this run failed during the enumeration of the API</param>
         /// <returns>Indicator of whether or not the update succeeded</returns>
+        /// </summary>
         public bool SetProcessFailure(long pnChangeSeq, int pnProcessID, string psCurrentAnchor)
         {
             bool bSuccess = true;
@@ -408,6 +413,7 @@ AND
         /// 
         /// <param name="psCurrentAnchor">The parameterized URL being used at this stage of the API enumeration</param>
         /// <returns>Indicator of whether or not the update succeeded</returns>
+        /// </summary>
         public bool UpsertAnchor(string psCurrentAnchor)
         {
             return UpsertAnchor(this.CurrentChangeSeq, this.CurrentProcessID, psCurrentAnchor);
@@ -422,6 +428,7 @@ AND
         /// <param name="pnProcessID">The definition ID of the configured Process in which we are interested</param>
         /// <param name="psCurrentAnchor">The parameterized URL used at this point of the API enumeration</param>
         /// <returns>Indicator of whether or not the update succeeded</returns>
+        /// </summary>
         public bool UpsertAnchor(long pnChangeSeq, int pnProcessID, string psCurrentAnchor)
         {
             bool bSuccess = true;
@@ -449,6 +456,7 @@ AND
         /// This method will validate the current status of the member property that is the connection to our database.
         /// 
         /// <returns>Indicator of whether or not the DB connection is still alive</returns>
+        /// </summary>
         public bool ValidateDbConnection()
         {
             lock (DbLock)
