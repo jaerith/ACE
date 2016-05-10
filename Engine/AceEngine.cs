@@ -566,6 +566,7 @@ namespace ACE.Engine
         /// 2.) The record (i.e., product) data will then be applied (i.e., upserted) to a staging table
         /// 
         /// <returns>None.</returns>
+        /// </summary>
         private void ConsumeData()
         {
             string sSubject = "AceEngine::ConsumeData()";
@@ -606,6 +607,7 @@ namespace ACE.Engine
         /// This method will return the thread that executes the main logic of this program.
         /// 
         /// <returns>The main logical thread of this program</returns>
+        /// </summary>
         private Thread SpawnConsumptionThread()
         {
             Thread oSpawnConsumptionThread = new Thread(ConsumeData);
