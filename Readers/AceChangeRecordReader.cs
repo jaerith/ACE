@@ -123,6 +123,7 @@ ORDER BY
         /// <param name="poTmpConfig">The configuration for the currently running Process</param>
         /// <param name="poNewProductRecord">The container that will hold the values parsed from the raw data payload for our record (i.e. product)</param>
         /// <returns>None</returns>
+        /// </summary>
         static public void PopulateProductData(SqlDataReader poNewProductReader, AceAPIConfiguration poTmpConfig, Hashtable poNewProductRecord)
         {
             string    sDataRecord = poNewProductReader[0].ToString();

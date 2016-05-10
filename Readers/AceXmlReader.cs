@@ -371,6 +371,7 @@ namespace ACE.Readers
         /// will traverse to the next available record.
         /// 
         /// <returns>The indicator of whether another record was read from the REST API</returns>
+        /// </summary>
         public bool MoveNext()
         {
             bool bResult = false;
@@ -403,6 +404,7 @@ namespace ACE.Readers
         /// to the API in order to retrieve the next batch.
         /// 
         /// <returns>The indicator of whether another batch was pulled through the REST API</returns>
+        /// </summary>
         private bool PullNextSet()
         {
             bool   bMoreData   = false;
@@ -500,6 +502,7 @@ namespace ACE.Readers
         /// This method will fulfill the contractual obligation of the IEnumerator interface.
         /// 
         /// <returns>None.</returns>
+        /// </summary>
         public void Reset()
         {
             return;
@@ -511,6 +514,7 @@ namespace ACE.Readers
         /// providing the latest record of the enumeration.
         /// 
         /// <returns>The latest record read via the enumeration</returns>
+        /// </summary>
         public object Current
         {
             get
