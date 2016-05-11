@@ -19,7 +19,7 @@ namespace ACE.Writers
     /// </summary>
     public interface IApplicable
     {
-        bool InitPreparedStatements(AceAPIBucket poBucketConfiguration);
+        bool InitPreparedStatements();
 
         bool CompareOldVersusNew(Hashtable poOldRecord, Hashtable poNewRecord);
 
