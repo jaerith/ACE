@@ -36,7 +36,7 @@ namespace ACE.Writers
 
             BucketConfiguration = poBucketConfiguration;
 
-            InitPreparedStatements(poBucketConfiguration);
+            InitPreparedStatements();
         }
 
         #region IDisposable() method
@@ -56,27 +56,41 @@ namespace ACE.Writers
         /// This method will intialize the prepared statements that will be constructed via direction 
         /// from the provided metadata.  These statements will then be used to 
         /// 
-        /// <param name="poBucketConfiguration">The configuration for the logical bucket (i.e., a table and a subset of its columns)</param>
         /// <returns>The ID representing the instance of the Process that failed previously</returns>
         /// </summary>
-        public bool InitPreparedStatements(AceAPIBucket poBucketConfiguration)
+        public bool InitPreparedStatements()
         {
-            CountCommand    = InitCountCommand(poBucketConfiguration);
-            RetrieveCommand = InitSelectCommand(poBucketConfiguration);
-            InsertCommand   = InitInsertCommand(poBucketConfiguration);
-            UpdateCommand   = InitUpdateCommand(poBucketConfiguration);
+            CountCommand    = InitCountCommand(BucketConfiguration);
+            RetrieveCommand = InitSelectCommand(BucketConfiguration);
+            InsertCommand   = InitInsertCommand(BucketConfiguration);
+            UpdateCommand   = InitUpdateCommand(BucketConfiguration);
 
             return true;
         }
 
-
+        /// <summary>
+        /// 
+        /// This method will make an accurate comparison the contents of the two records, the old and the new.
+        /// It will be accurate by using comparisons based on type.  For example, it will convert certain strings 
+        /// to numeric values and then compare them.
+        /// 
+        /// <param name="poOldRecord">The old record</param>
+        /// <param name="poNewRecord">The new record</param>
+        /// <returns>The boolean indicating whether or not the two records are exactly the same</returns>
+        /// </summary>
         public bool CompareOldVersusNew(Hashtable poOldRecord, Hashtable poNewRecord)
         {
             // Finish implementation
             return true;
         }
 
-
+        /// <summary>
+        /// 
+        /// This method upsert the record into the target table and columns defined by a logical Bucket.
+        /// 
+        /// <param name="poRecord">The record whose contents will be upserted into the table</param>
+        /// <returns>The boolean indicating whether or not the upsert succeeded</returns>
+        /// </summary>
         public bool UpsertRecord(Hashtable poRecord)
         {
             // Finish implementation
