@@ -257,6 +257,31 @@ namespace ACE.Writers
             }
         }
 
+        /// <summary>
+        /// 
+        /// This method will set the parameters' values for the prepared statement.
+        /// 
+        /// <param name="poCommand">The preparement statement to which we will set the needed parameters</param>
+        /// <param name="poBucketConfiguration">The configuration for the logical bucket (i.e., a table and a subset of its columns)</param>
+        /// <param name="poRecord">The record whose values will be used to set the prepared statement</param>
+        /// <returns>None</returns>
+        /// </summary>
+        private void SetParemeters(SqlCommand poCommand, AceAPIBucket poBucketConfiguration, Hashtable poRecord)
+        {
+            foreach (string sTmpColumn in poBucketConfiguration.SoughtColumns.Keys)
+            {
+                if (poRecord.ContainsKey(sTmpColumn))
+                {
+                    string sValue = (string) poRecord[sTmpColumn];
+
+                    if (!String.IsNullOrEmpty(sValue))
+                        poCommand.Parameters[sTmpColumn].Value = sValue;
+                    else
+                        poCommand.Parameters[sTmpColumn].Value = DBNull.Value;
+                }
+            }
+        }
+
         #endregion
 
     }
