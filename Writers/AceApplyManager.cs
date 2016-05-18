@@ -80,8 +80,20 @@ namespace ACE.Writers
         /// </summary>
         public bool CompareOldVersusNew(Hashtable poOldRecord, Hashtable poNewRecord)
         {
-            // Finish implementation
-            return true;
+            bool bSameIndicator = true;
+
+            foreach (string sNewKey in poNewRecord.Keys)
+            {
+                if (poOldRecord.ContainsKey(sNewKey))
+                {
+                    string sOldValue = (string) poOldRecord[sNewKey];
+                    string sNewValue = (string) poNewRecord[sNewKey];
+
+                    // Finish implementation
+                }
+            }
+            
+            return bSameIndicator;
         }
 
         /// <summary>
@@ -93,8 +105,17 @@ namespace ACE.Writers
         /// </summary>
         public bool UpsertRecord(Hashtable poRecord)
         {
-            // Finish implementation
-            return true;
+            bool bSuccess = false;
+
+            SetParemeters(UpdateCommand, BucketConfiguration, poRecord);
+            if (UpdateCommand.ExecuteNonQuery() <= 0)
+            {
+                SetParemeters(InsertCommand, BucketConfiguration, poRecord);
+                if (InsertCommand.ExecuteNonQuery() <= 0)
+                    bSuccess = false;
+            }
+
+            return bSuccess;
         }
         #endregion
 
