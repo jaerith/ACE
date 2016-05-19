@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace ACE.DB.Classes
 {
+    #region CONSTANTS
+    public enum ContentType { XML = 1, JSON };
+    #endregion
+
     /// <summary>
     /// 
     /// This class serves as the representation of a record within the 
@@ -22,6 +26,8 @@ namespace ACE.DB.Classes
             BaseURL            = SinceURLArg   = "";
             AnchorIndicator    = AnchorElement = "";
             ResponseFilterPath = TargetTag     = TargetKeyTag = "";
+
+            DataContentType = ContentType.XML;
 
             KeyList           = new HashSet<string>();
             AnchorFilterArgs  = new Dictionary<string, string>();
@@ -42,6 +48,8 @@ namespace ACE.DB.Classes
         public Dictionary<string, AceAPIBucket> ApplyBuckets { get; set; }
 
         public string BaseURL { get; set; }
+
+        public ContentType DataContentType { get; set; }
 
         public string CurrentAnchor { get; set; }
 
