@@ -7,8 +7,11 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
+
+using Newtonsoft.Json;
 
 using ACE.DB.Classes;
 
@@ -264,31 +267,18 @@ namespace ACE.Readers
 
         /// <summary>
         /// 
-        /// This method will assemble the next call to the REST API and then retrieve the
-        /// XML payload as a XDocument.
-        /// 
-        /// <param name="psBaseURL">The base call for the REST API</param>
-        /// <param name="poFilterArgs">The query string's arguments and values for the REST API</param>
-        /// <returns>The XDocument representation of the XML payload from the REST API</returns>
-        /// </summary>
-        static public XDocument PullXmlDoc(string psBaseURL, Dictionary<string, string> poFilterArgs)
-        {
-            string sRequestURL = AceXmlReader.FormatURL(psBaseURL, poFilterArgs);
-
-            return PullXmlDoc(sRequestURL);
-        }
-
-        /// <summary>
-        /// 
         /// This method will make the next call to the REST API and then retrieve the
         /// XML payload as a XDocument.
         /// 
-        /// <param name="psRequestURL">The Request URL for our call to the REST API</param>
+        /// <param name="poEnumConfiguration">The Configuration metadata for our calls to the REST API</param>
+        /// <param name="psRequestURL">The formatted Request URL for our call to the REST API</param>
         /// <returns>The XDocument representation of the XML payload from the REST API</returns>
         /// </summary>
-        static public XDocument PullXmlDoc(string psRequestURL)
+        static public XDocument PullXmlDoc(AceAPIConfiguration poEnumConfiguration, string psRequestURL)
         {
-            XDocument oXDoc = null;
+            bool bContentTypeXml = (poEnumConfiguration.DataContentType == ContentType.XML);
+
+            XDocument  oXDoc          = null;
             WebRequest oWebAPIRequest = null;
 
             for (int nRetryCount = 0; nRetryCount < 3; ++nRetryCount)
@@ -310,7 +300,23 @@ namespace ACE.Readers
                         // Open the stream using a StreamReader for easy access.
                         using (StreamReader oWebReader = new StreamReader(oDataStream))
                         {
-                            oXDoc = XDocument.Load(oWebReader, LoadOptions.PreserveWhitespace);
+                            if (bContentTypeXml)
+                                oXDoc = XDocument.Load(oWebReader, LoadOptions.PreserveWhitespace);
+                            else
+                            {
+                                string sJsonOutput = oWebReader.ReadToEnd();
+
+                                if (sJsonOutput.StartsWith("["))
+                                    sJsonOutput = "{\n \"root\": { \n  \"product\": " + sJsonOutput + "} }";
+
+                                XmlDocument oXmlDoc = (XmlDocument) JsonConvert.DeserializeXmlNode(sJsonOutput);
+
+                                using (var nodeReader = new XmlNodeReader(oXmlDoc))
+                                {
+                                    nodeReader.MoveToContent();
+                                    oXDoc = XDocument.Load(nodeReader);
+                                }
+                            }
                         }
                     }
 
@@ -420,7 +426,7 @@ namespace ACE.Readers
             System.Console.WriteLine("DEBUG: The next request via the Change API is URL (" + sRequestURL + ")..." + DateTime.Now.ToString());
             System.Console.Out.Flush();
 
-            CurrXmlResponse = AceXmlReader.PullXmlDoc(sRequestURL);
+            CurrXmlResponse = AceXmlReader.PullXmlDoc(EnumAPIConfiguration, sRequestURL);
 
             if (!String.IsNullOrEmpty(EnumAPIConfiguration.AnchorIndicator))
             {
