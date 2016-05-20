@@ -76,6 +76,7 @@ SELECT aca.api_type as aca_api_type
        , aca.target_chld_key_tag as aca_target_chld_key_tag
        , aca.target_key_list as aca_target_key_list
        , aca.pulls_single_item_flag as aca_pulls_single_item_flag
+       , aca.content_type as aca_content_type
   FROM ace_cfg_api aca
  WHERE aca.process_id = @pid
 ORDER BY aca.api_type ASC
@@ -387,6 +388,14 @@ ORDER BY
                     // poTmpConfig.KeyList.InsertRange(0, oKeyList);
                 }
             }
+
+            string sContentType = poProcessDetailsReader["aca_content_type"].ToString();
+            if (sContentType.ToUpper() == "XML")
+                poTmpConfig.DataContentType = ContentType.XML;
+            else if (sContentType.ToUpper() == "JSON")
+                poTmpConfig.DataContentType = ContentType.JSON;
+            else
+                poTmpConfig.DataContentType = ContentType.XML;
         }
 
         /// <summary>
@@ -424,7 +433,7 @@ ORDER BY
                     string sAttrLen       = poAPIDetailsReader["attr_ora_type_len"].ToString();
                     string sAttrIsKey     = poAPIDetailsReader["attr_is_key"].ToString();
                     string sAttrXPath     = poAPIDetailsReader["attr_xpath"].ToString();
-                    string sAttrIsXmlBody = poAPIDetailsReader["attr_is_xml_body"].ToString();
+                    string sAttrIsXmlBody = poAPIDetailsReader["attr_is_xml_body"].ToString();                    
 
                     int nAttrLen = -1;
                     if (!String.IsNullOrEmpty(sAttrLen))
