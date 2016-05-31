@@ -1,7 +1,7 @@
 
 CREATE TABLE [dbo].[ACE_CHANGE_PRODUCT]
 (
- [ID]           [numeric]   (13, 0)   NOT NULL,
+ [ID]           [numeric]   (13, 0)   NOT NULL AUTO_INCREMENT,
  [CHANGE_ID]    [numeric]   (10, 0)   NOT NULL,
  [EAN]          [numeric]   (13, 0)   NOT NULL, 
  [NOTIFICATION] [clob],

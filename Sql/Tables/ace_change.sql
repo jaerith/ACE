@@ -1,7 +1,7 @@
 
 CREATE TABLE [dbo].[ACE_CHANGE]
 (
-  [CHANGE_ID]           [numeric]   (10, 0)   NOT NULL,
+  [CHANGE_ID]           [numeric]   (10, 0)   NOT NULL AUTO_INCREMENT,
   [PROCESS_ID]          [numeric]   (6, 0)    NOT NULL,
   [START_DTIME]         [datetime]            NOT NULL,
   [END_DTIME]           [datetime]            NOT NULL,
