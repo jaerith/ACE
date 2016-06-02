@@ -89,7 +89,19 @@ namespace ACE.Writers
                     string sOldValue = (string) poOldRecord[sNewKey];
                     string sNewValue = (string) poNewRecord[sNewKey];
 
-                    // Finish implementation
+                    SqlDbType Type = BucketConfiguration.SoughtColumns[sNewKey];
+
+                    if (IsDouble(Type))
+                        bSameIndicator = CompareDoubles(sOldValue, sNewValue);
+                    else if (IsNumeric(Type))
+                        bSameIndicator = CompareNumbers(sOldValue, sNewValue);
+                    else if (IsDate(Type))
+                        bSameIndicator = CompareDates(sOldValue, sNewValue);
+                    else
+                        bSameIndicator = CompareStrings(sOldValue, sNewValue);
+
+                    if (!bSameIndicator)
+                        break;
                 }
             }
             
@@ -120,6 +132,30 @@ namespace ACE.Writers
         #endregion
 
         #region Support Methods
+
+        private bool CompareDates(string psOldValue, string psNewValue)
+        {
+            // Finish implementation
+            return true;
+        }
+
+        private bool CompareDoubles(string psOldValue, string psNewValue)
+        {
+            // Finish implementation
+            return true;
+        }
+
+        private bool CompareNumbers(string psOldValue, string psNewValue)
+        {
+            // Finish implementation
+            return true;
+        }
+
+        private bool CompareStrings(string psOldValue, string psNewValue)
+        {
+            // Finish implementation
+            return true;
+        }
 
         /// <summary>
         /// 
@@ -253,6 +289,24 @@ namespace ACE.Writers
             PrepareParemeters(NewUpdateCommand, poBucketConfiguration);
 
             return new SqlCommand(UpdateStatement.ToString(), DbConn);
+        }
+
+        private bool IsDate(SqlDbType poColType)
+        {
+            // Finish implementation
+            return true;
+        }
+
+        private bool IsDouble(SqlDbType poColType)
+        {
+            // Finish implementation
+            return true;
+        }
+
+        private bool IsNumeric(SqlDbType poColType)
+        {
+            // Finish implementation
+            return true;
         }
 
         /// <summary>
