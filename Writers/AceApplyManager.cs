@@ -18,6 +18,11 @@ namespace ACE.Writers
     ///     
     public class AceApplyManager : IDisposable, IApplicable
     {
+        private static object          ListsLock       = new object();
+        private static List<SqlDbType> DateTypeList    = null;
+        private static List<SqlDbType> NumericTypeList = null;
+        private static List<SqlDbType> DoubleTypeList  = null;
+
         private SqlConnection DbConn;
 
         private SqlCommand CountCommand;
@@ -37,6 +42,31 @@ namespace ACE.Writers
             BucketConfiguration = poBucketConfiguration;
 
             InitPreparedStatements();
+
+            lock (ListsLock)
+            {
+                if (DateTypeList == null)
+                {
+                    DateTypeList = 
+                        new List<SqlDbType> { SqlDbType.Date, SqlDbType.DateTime, SqlDbType.DateTime2, 
+                                              SqlDbType.SmallDateTime, SqlDbType.Time, SqlDbType.Time };
+                }
+
+                if (NumericTypeList == null)
+                {
+                    NumericTypeList =
+                        new List<SqlDbType> { SqlDbType.BigInt, SqlDbType.Bit, SqlDbType.Int,
+                                              SqlDbType.SmallInt, SqlDbType.TinyInt };
+                }
+
+                if (DoubleTypeList == null)
+                {
+                    DoubleTypeList =
+                        new List<SqlDbType> { SqlDbType.Decimal, SqlDbType.Float, SqlDbType.Money, 
+                                              SqlDbType.Real, SqlDbType.SmallMoney };
+                }
+            }
+
         }
 
         #region IDisposable() method
@@ -291,22 +321,40 @@ namespace ACE.Writers
             return new SqlCommand(UpdateStatement.ToString(), DbConn);
         }
 
+        /// <summary>
+        /// 
+        /// This method will detect whether this SqlDbType falls into the general category of being a date type.
+        /// 
+        /// <param name="poColType">The SQL Server database type associated with a particular column</param>
+        /// <returns>The bool that indicates whether or not the provided type belongs to our general category</returns>
+        /// </summary>
         private bool IsDate(SqlDbType poColType)
         {
-            // Finish implementation
-            return true;
+            return DateTypeList.Contains(poColType);
         }
 
+        /// <summary>
+        /// 
+        /// This method will detect whether this SqlDbType falls into the general category of being a double type.
+        /// 
+        /// <param name="poColType">The SQL Server database type associated with a particular column</param>
+        /// <returns>The bool that indicates whether or not the provided type belongs to our general category</returns>
+        /// </summary>
         private bool IsDouble(SqlDbType poColType)
         {
-            // Finish implementation
-            return true;
+            return DoubleTypeList.Contains(poColType);
         }
 
+        /// <summary>
+        /// 
+        /// This method will detect whether this SqlDbType falls into the general category of being a numeric type.
+        /// 
+        /// <param name="poColType">The SQL Server database type associated with a particular column</param>
+        /// <returns>The bool that indicates whether or not the provided type belongs to our general category</returns>
+        /// </summary>
         private bool IsNumeric(SqlDbType poColType)
         {
-            // Finish implementation
-            return true;
+            return NumericTypeList.Contains(poColType);
         }
 
         /// <summary>
