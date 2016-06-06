@@ -163,10 +163,28 @@ namespace ACE.Writers
 
         #region Support Methods
 
+        /// <summary>
+        /// 
+        /// This method will compare two strings that are actually dates.
+        /// 
+        /// <param name="psOldValue">The old date (i.e., the value on the database table)</param>
+        /// <param name="psNewValue">The new date (i.e., the incoming value)</param>
+        /// <returns>The boolean indicating whether or not they are the same date</returns>
+        /// </summary>
         private bool CompareDates(string psOldValue, string psNewValue)
         {
-            // Finish implementation
-            return true;
+            bool bSameDate = false;
+
+            if (!String.IsNullOrEmpty(psOldValue) || !String.IsNullOrEmpty(psNewValue))
+            {
+                DateTime OldDate = DateTime.Parse(psOldValue);
+                DateTime NewDate = DateTime.Parse(psNewValue);
+
+                if (OldDate.CompareTo(NewDate) == 0)
+                    bSameDate = true;
+            }
+            
+            return bSameDate;
         }
 
         private bool CompareDoubles(string psOldValue, string psNewValue)
