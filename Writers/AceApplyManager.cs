@@ -187,22 +187,65 @@ namespace ACE.Writers
             return bSameDate;
         }
 
+        /// <summary>
+        /// 
+        /// This method will compare two strings that are actually doubles.
+        /// 
+        /// <param name="psOldValue">The old value (i.e., the value on the database table)</param>
+        /// <param name="psNewValue">The new value (i.e., the incoming value)</param>
+        /// <returns>The boolean indicating whether or not they are the same double</returns>
+        /// </summary>
         private bool CompareDoubles(string psOldValue, string psNewValue)
         {
-            // Finish implementation
-            return true;
+            bool bSameNumber = false;
+
+            if (!String.IsNullOrEmpty(psOldValue) || !String.IsNullOrEmpty(psNewValue))
+            {
+                Double OldValue = Convert.ToDouble(psOldValue);
+                Double NewValue = Convert.ToDouble(psNewValue);
+
+                if (OldValue == NewValue)
+                    bSameNumber = true;
+            }
+
+            return bSameNumber;
         }
 
+        /// <summary>
+        /// 
+        /// This method will compare two strings that are actually longs.
+        /// 
+        /// <param name="psOldValue">The old value (i.e., the value on the database table)</param>
+        /// <param name="psNewValue">The new value (i.e., the incoming value)</param>
+        /// <returns>The boolean indicating whether or not they are the same long</returns>
+        /// </summary>
         private bool CompareNumbers(string psOldValue, string psNewValue)
         {
-            // Finish implementation
-            return true;
+            bool bSameNumber = false;
+
+            if (!String.IsNullOrEmpty(psOldValue) || !String.IsNullOrEmpty(psNewValue))
+            {
+                long OldValue = Convert.ToInt64(psOldValue);
+                long NewValue = Convert.ToInt64(psNewValue);
+
+                if (OldValue == NewValue)
+                    bSameNumber = true;
+            }
+
+            return bSameNumber;
         }
 
+        /// <summary>
+        /// 
+        /// This method will compare two strings that are actually strings.
+        /// 
+        /// <param name="psOldValue">The old value (i.e., the value on the database table)</param>
+        /// <param name="psNewValue">The new value (i.e., the incoming value)</param>
+        /// <returns>The boolean indicating whether or not they are the same string</returns>
+        /// </summary>
         private bool CompareStrings(string psOldValue, string psNewValue)
         {
-            // Finish implementation
-            return true;
+            return (psOldValue == psNewValue);
         }
 
         /// <summary>
