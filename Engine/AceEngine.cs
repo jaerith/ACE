@@ -275,9 +275,14 @@ namespace ACE.Engine
         {
             Dictionary<string, IApplicable> ApplyManagers = new Dictionary<string, IApplicable>();
 
-            /*
-             * Complete your own implementation here
-             */
+            foreach (string sBucketName in poProcess.DataAPIConfiguration.ApplyBuckets.Keys)
+            {
+                AceAPIBucket TempBucket = poProcess.DataAPIConfiguration.ApplyBuckets[sBucketName];
+
+                AceApplyManager TempApplyManager = new AceApplyManager(moStgConnectionMetadata, TempBucket);
+
+                ApplyManagers[sBucketName] = TempApplyManager;
+            }
 
             return ApplyManagers;
         }
