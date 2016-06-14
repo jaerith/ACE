@@ -1,0 +1,2 @@
+1|'Pulls the latest information about products through the API.'|'MostRecentProductData'|'N'|getdate()|getdate()
+2|'Pulls data about products from a hard-coded list.'|'ProductData_HardCodedList'|'N'|getdate()|getdate()
