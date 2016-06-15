@@ -1,0 +1,2 @@
+1|'D'|'http://mypersonaldataretrieval.com/api/catalog/products'|'main,pricing,availability'|'since'|'hasMore'|'next'|'products=BK'|'products=BK,since=1d'|'//delta[country=''US'' or country='''']'|'product'|'ean'|'Y'||'JSON'|5/8/2015 11:01:05 AM|5/8/2015 11:01:05 AM
+2|'D'|'http://mypersonaldataretrieval.com/api/catalog/products'|'main,pricing,availability'|||||'region=US,ean=//product/ean,buckets=//product/bucket'||||'Y'|'tmp_ean_list'|'XML'|2/27/2015 1:25:35 PM|2/27/2015 1:25:35 PM
