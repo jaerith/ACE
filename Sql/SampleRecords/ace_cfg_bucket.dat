@@ -1,0 +1,6 @@
+1|'D'|'main'|'EAN'|'product_main_data'|'BigInt'||'Y'|'//main/ean'|'N'|2/27/2015 1:26:41 PM|2/27/2015 1:26:41 PM
+1|'D'|'main'|'TITLE'|'product_main_data'|'Varchar2'|500|'N'|'//main/title'|'N'|2/27/2015 1:27:49 PM|2/27/2015 1:27:49 PM
+1|'D'|'main'|'LANG_CD'|'product_main_data'|'Varchar2'|3|'N'|'//main/language'|'N'|2/27/2015 1:33:04 PM|2/27/2015 1:33:04 PM
+1|'D'|'price'|'RETAIL_PRICE'|'product_main_data'|'Decimal'||'N'|'//main/price'|'N'|2/27/2015 1:33:04 PM|2/27/2015 1:33:04 PM
+1|'D'|'currency_cd'|'CURRENCY_CD'|'product_main_data'|'Varchar2'|3|'N'|'//main/currency'|'N'|2/27/2015 1:33:04 PM|2/27/2015 1:33:04 PM
+
