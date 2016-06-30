@@ -32,6 +32,7 @@ namespace ACE.DB.Classes
             KeyList           = new HashSet<string>();
             AnchorFilterArgs  = new Dictionary<string, string>();
             RequestFilterArgs = new Dictionary<string, string>();
+            RequestHeaderArgs = new Dictionary<string, string>();
             ApplyBuckets      = new Dictionary<string, AceAPIBucket>();
         }
 
@@ -54,6 +55,8 @@ namespace ACE.DB.Classes
         public string CurrentAnchor { get; set; }
 
         public HashSet<string> KeyList { get; set; }
+
+        public Dictionary<string, string> RequestHeaderArgs { get; set; }
 
         public Dictionary<string, string> RequestFilterArgs { get; set; }
 
