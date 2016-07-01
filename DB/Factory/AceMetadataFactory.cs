@@ -77,6 +77,7 @@ SELECT aca.api_type as aca_api_type
        , aca.target_key_list as aca_target_key_list
        , aca.pulls_single_item_flag as aca_pulls_single_item_flag
        , aca.content_type as aca_content_type
+       , aca.request_hdr_args as aca_rq_hdr_args
   FROM ace_cfg_api aca
  WHERE aca.process_id = @pid
 ORDER BY aca.api_type ASC
@@ -334,7 +335,7 @@ ORDER BY
         /// </summary>
         private void SetAPIBasicConfiguration(SqlDataReader poProcessDetailsReader, AceAPIConfiguration poTmpConfig)
         {
-            poTmpConfig.BaseURL      = poProcessDetailsReader["aca_base_url"].ToString();
+            poTmpConfig.BaseURL = poProcessDetailsReader["aca_base_url"].ToString();
             poTmpConfig.ApplyBuckets = new Dictionary<string, AceAPIBucket>();
 
             string   sBucketList = poProcessDetailsReader["aca_bucket_list"].ToString();
@@ -342,12 +343,12 @@ ORDER BY
             foreach (string sBucketName in oBucketList)
                 poTmpConfig.ApplyBuckets[sBucketName] = new AceAPIBucket();
 
-            poTmpConfig.SinceURLArg      = poProcessDetailsReader["aca_since_url_arg_nm"].ToString();
-            poTmpConfig.AnchorIndicator  = poProcessDetailsReader["aca_anchor_ind_tag_nm"].ToString();
-            poTmpConfig.AnchorElement    = poProcessDetailsReader["aca_anchor_val_tag_nm"].ToString();
+            poTmpConfig.SinceURLArg     = poProcessDetailsReader["aca_since_url_arg_nm"].ToString();
+            poTmpConfig.AnchorIndicator = poProcessDetailsReader["aca_anchor_ind_tag_nm"].ToString();
+            poTmpConfig.AnchorElement   = poProcessDetailsReader["aca_anchor_val_tag_nm"].ToString();
 
-            string   sAnchorFilterArgs  = poProcessDetailsReader["aca_anchor_filter_args"].ToString();
-            string[] oAnchorFilterList  = sAnchorFilterArgs.Split(CONST_BUCKET_LIST_DELIM);
+            string   sAnchorFilterArgs = poProcessDetailsReader["aca_anchor_filter_args"].ToString();
+            string[] oAnchorFilterList = sAnchorFilterArgs.Split(CONST_BUCKET_LIST_DELIM);
             foreach (string sTmpAnchorFilter in oAnchorFilterList)
             {
                 if (sTmpAnchorFilter.Contains("="))
@@ -396,6 +397,18 @@ ORDER BY
                 poTmpConfig.DataContentType = ContentType.JSON;
             else
                 poTmpConfig.DataContentType = ContentType.XML;
+
+            string   sRequestHeaderArgs = poProcessDetailsReader["aca_rq_hdr_args"].ToString();
+            string[] oRequestHeaderList = sRequestHeaderArgs.Split(CONST_BUCKET_LIST_DELIM);
+            foreach (string sTmpRequestHeader in oRequestHeaderList)
+            {
+                if (sTmpRequestHeader.Contains("="))
+                {
+                    string[] oRequestHeaderPair = sTmpRequestHeader.Split(CONST_PARAM_VAL_DELIM);
+                    if (oRequestHeaderPair.Length == 2)
+                        poTmpConfig.RequestHeaderArgs[oRequestHeaderPair[0]] = oRequestHeaderPair[1];
+                }
+            }
         }
 
         /// <summary>
