@@ -338,7 +338,10 @@ namespace ACE.Engine
 
                                 try
                                 {
-                                    sTmpDataBody = AceXmlReader.PullData(poTempProcess.DataAPIConfiguration.BaseURL, oTmpFilterArgs);
+                                    sTmpDataBody = 
+                                        AceXmlReader.PullData(poTempProcess.DataAPIConfiguration.BaseURL, 
+                                                              oTmpFilterArgs, 
+                                                              poTempProcess.DataAPIConfiguration.RequestHeaderArgs);
                                 }
                                 catch (WebException ex)
                                 {
