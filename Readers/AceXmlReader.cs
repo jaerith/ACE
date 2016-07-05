@@ -220,6 +220,30 @@ namespace ACE.Readers
 
         /// <summary>
         /// 
+        /// This method will assemble the next call to the REST API and then retrieve the
+        /// XML payload as a string.
+        /// 
+        /// <param name="psBaseURL">The base call for the REST API</param>
+        /// <param name="poFilterArgs">The query string's arguments and values for the REST API</param>
+        /// <param name="poHeaderArgs">The header arguments to be provided for the REST API</param>
+        /// <returns>The string representation of the XML payload from the REST API</returns>
+        /// </summary>
+        static public string PullData(string psBaseURL, Dictionary<string, string> poFilterArgs, Dictionary<string, string> poHeaderArgs)
+        {
+            string     sRequestURL   = AceXmlReader.FormatURL(psBaseURL, poFilterArgs);
+            WebRequest AceWebRequest = WebRequest.Create(sRequestURL);
+
+            if ((poHeaderArgs != null) && (poHeaderArgs.Count > 0))
+            {
+                foreach (string sTmpName in poHeaderArgs.Keys)
+                    AceWebRequest.Headers.Add(sTmpName, poHeaderArgs[sTmpName]);
+            }
+
+            return PullData(AceWebRequest);
+        }
+
+        /// <summary>
+        /// 
         /// This method will make the next call to the REST API and then retrieve the
         /// XML payload as a string.
         /// 
