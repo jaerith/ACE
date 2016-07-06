@@ -443,7 +443,7 @@ namespace ACE.Engine
                 }
 
                 oTmpFilterArgs = AceXmlReader.ExtractFilterArgs(sTmpChangeBody, poProcess.DataAPIConfiguration.RequestFilterArgs);
-                sTmpDataBody   = AceXmlReader.PullData(poProcess.DataAPIConfiguration.BaseURL, oTmpFilterArgs);
+                sTmpDataBody   = AceXmlReader.PullData(poProcess.DataAPIConfiguration.BaseURL, oTmpFilterArgs, poProcess.DataAPIConfiguration.RequestHeaderArgs);
 
                 if (!String.IsNullOrEmpty(sTmpKey))
                     poRecordWriter.InsertProductInstance(poProcess.ChangeSeq, nTmpKey, sTmpChangeBody, sTmpDataBody);
