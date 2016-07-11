@@ -316,6 +316,12 @@ namespace ACE.Readers
                     // If required by the server, set the credentials.
                     oWebAPIRequest.Credentials = CredentialCache.DefaultCredentials;
 
+                    if ((poEnumConfiguration.RequestHeaderArgs != null) && (poEnumConfiguration.RequestHeaderArgs.Count > 0))
+                    {
+                        foreach (string sTmpName in poEnumConfiguration.RequestHeaderArgs.Keys)
+                            oWebAPIRequest.Headers.Add(sTmpName, poEnumConfiguration.RequestHeaderArgs[sTmpName]);
+                    }
+
                     using (WebResponse oWebAPIResponse = oWebAPIRequest.GetResponse())
                     {
                         // Get the stream containing content returned by the server.
