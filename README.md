@@ -6,6 +6,7 @@ This project is currently at the level of being a prototype, and it has not yet 
 # Requirements
 * Windows 7 (at least)
 * Visual Studio 2012 (at least)
+* Microsoft SQL Server 
 
 # For More Information
 This solution is a sample project that demonstrates the ideas presented in my <a target="_blank" href="http://www.infoq.com/articles/mdd-api-data-retrieval">InfoQ article</a>.
