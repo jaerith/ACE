@@ -280,6 +280,20 @@ namespace ACE.Readers
                     {
                         System.Console.WriteLine("DEBUG: Timeout issue with pulling product data for URL(" + poAPIRequest.RequestUri.ToString() +
                                                  ")...attempting to pull the data again...");
+
+                        Thread.Sleep(5000);
+                    }
+                    else
+                        throw ex;
+                }
+                catch (IOException ex)
+                {
+                    if ((nRetryCount + 1) < 3)
+                    {
+                        System.Console.WriteLine("DEBUG: General network issue with pulling product data for URL(" + poAPIRequest.RequestUri.ToString() +
+                                                 ")...attempting to pull the data again...");
+
+                        Thread.Sleep(5000);
                     }
                     else
                         throw ex;
