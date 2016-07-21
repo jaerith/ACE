@@ -31,6 +31,7 @@ namespace ACE.Readers
 
         public static string CONST_RESPONSE_XML_BODY_KEY = "body";
 
+        public const int    CONST_MAX_RETRY_COUNT                        = 3;
         public const int    CONST_WEB_REQUEST_TIMEOUT_MS                 = 60000;
         public const string CONST_DEFAULT_CHG_MANIFEST_REQUEST_XML_BODY  = "<Provide a default change manifest request XML body here>";
         public const string CONST_DEFAULT_CHG_MANIFEST_RESPONSE_XML_BODY = "<Provide a default change manifest response XML body here>";
@@ -256,7 +257,7 @@ namespace ACE.Readers
 
             poAPIRequest.Timeout = CONST_WEB_REQUEST_TIMEOUT_MS;
 
-            for (int nRetryCount = 0; nRetryCount < 3; ++nRetryCount)
+            for (int nRetryCount = 0; nRetryCount < CONST_MAX_RETRY_COUNT; ++nRetryCount)
             {
                 try
                 {
@@ -276,7 +277,7 @@ namespace ACE.Readers
                 }
                 catch (WebException ex)
                 {
-                    if ((nRetryCount + 1) < 3)
+                    if ((nRetryCount + 1) < CONST_MAX_RETRY_COUNT)
                     {
                         System.Console.WriteLine("DEBUG: Timeout issue with pulling product data for URL(" + poAPIRequest.RequestUri.ToString() +
                                                  ")...attempting to pull the data again...");
@@ -288,7 +289,7 @@ namespace ACE.Readers
                 }
                 catch (IOException ex)
                 {
-                    if ((nRetryCount + 1) < 3)
+                    if ((nRetryCount + 1) < CONST_MAX_RETRY_COUNT)
                     {
                         System.Console.WriteLine("DEBUG: General network issue with pulling product data for URL(" + poAPIRequest.RequestUri.ToString() +
                                                  ")...attempting to pull the data again...");
@@ -319,7 +320,7 @@ namespace ACE.Readers
             XDocument  oXDoc          = null;
             WebRequest oWebAPIRequest = null;
 
-            for (int nRetryCount = 0; nRetryCount < 3; ++nRetryCount)
+            for (int nRetryCount = 0; nRetryCount < CONST_MAX_RETRY_COUNT; ++nRetryCount)
             {
                 try
                 {
@@ -368,13 +369,15 @@ namespace ACE.Readers
                 }
                 catch (WebException ex)
                 {
-                    if ((nRetryCount + 1) < 3)
+                    if ((nRetryCount + 1) < CONST_MAX_RETRY_COUNT)
                     {
                         if (oWebAPIRequest != null)
                         {
                             System.Console.WriteLine("DEBUG: Timeout (value=" + oWebAPIRequest.Timeout + ") issue with pulling catalog data for URL(" +
                                                      oWebAPIRequest.RequestUri.ToString() + ")...attempting to pull the data again..." + DateTime.Now.ToString());
                         }
+
+                        Thread.Sleep(5000);
                     }
                     else
                         throw ex;
