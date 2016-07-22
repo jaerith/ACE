@@ -382,6 +382,19 @@ namespace ACE.Readers
                     else
                         throw ex;
                 }
+                catch (IOException ex)
+                {
+                    if ((nRetryCount + 1) < CONST_MAX_RETRY_COUNT)
+                    {
+                        System.Console.WriteLine("DEBUG: General network issue with pulling catalog data for URL(" + oWebAPIRequest.RequestUri.ToString() +
+                                                 ")...attempting to pull the data again...");
+
+                        Thread.Sleep(5000);
+                    }
+                    else
+                        throw ex;
+                }
+
             }
 
             return oXDoc;
